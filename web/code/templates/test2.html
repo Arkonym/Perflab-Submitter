@@ -2,48 +2,24 @@
 {% block title %} {{ page_name }} {% endblock %}
 {% block external %}
 <script type="text/javascript" src="site_media/jquery.js"></script>
-<script>
-
-/*new Ajax.Request('/test2', {
-  method:'get',
-  onSuccess: function(transport) {
-    var response = transport.responseText || "no response text";
-    //alert("Success! \n\n" + response);
-    $('content').replace(response)
-    new Ajax.Request('/test3', {
-      method:'get',
-      onSuccess: function(transport) {
-        var response2 = transport.responseText || "no response text";
-        //alert("Success! \n\n" + response);
-        $('content').replace(response2)
-      },
-      onFailure: function() { alert('Something went wrong...'); }
-    });
-
-  },
-  onFailure: function() { alert('Something went wrong...'); }
-});*/
-
-$(function() {
-    $.ajax({ url: "/test2",
-        context: document.body,
-        success: function(response){
-           $('#content').replaceWith(response)
-           $.ajax({ url: "/test3",
-               context: document.body,
-               success: function(response2){
-                $('#content').replaceWith(response2)
-                alert("done");
-            }});
-    }});
-});
-</script>
+<script type="text/javascript" src="site_media/react.js"></script>
+<script type="text/javascript" src="site_media/JSXTransformer.js"></script>
+<script type="text/jsx" src="site_media/js/submit.js"></script>
 {% endblock %}
 {% block head %}
 Testing
 {% endblock %}
 {% block content %}
 
-<div id="content">Testing </div>
+<div id="container">
+  <p>
+    If you can see this, React is not working right. This is probably because you&apos;re viewing
+    this on your file system instead of a web server. Try running
+    <pre>
+      python -m SimpleHTTPServer
+    </pre>
+    and going to <a href="http://localhost:8000/">http://localhost:8000/</a>.
+  </p>
+</div>
 
 {% endblock %}

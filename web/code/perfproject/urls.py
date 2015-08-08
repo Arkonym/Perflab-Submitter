@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^test$','perfapp.views.test'),
     url(r'^test2$','perfapp.views.test2'),
     url(r'^test3$','perfapp.views.test3'),
+    url(r'^test4$','perfapp.views.test4'),
 ]

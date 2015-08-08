@@ -15,6 +15,7 @@ from subprocess import Popen,PIPE
 from redis import Redis
 red = Redis(host='redis2', port=6379)
 red.set('servers',2)
+red.set('per',-1)
 
 
 from datetime import datetime
@@ -149,7 +150,21 @@ def test(request):
     return HttpResponse(toReturn)
 
 def test2(request):
-    return HttpResponse("Hello World")
+    if int(red.get('servers'))>0:
+        red.decr('servers')
+        taskid = testing.delay(1)
+        taskid.wait()
+        return HttpResponse(taskid)
+    else:
+        return HttpResponse("No Servers")
 
 def test3(request):
-    return HttpResponse("Hello World2")
+    taskid = testing.delay(1)
+    taskid.wait()
+    return HttpResponse(taskid)
+
+def test4(request):
+    if int(red.get('per'))>=100:
+        red.set('per',-1)
+    red.incr('per')
+    return HttpResponse(red.get('per'))
