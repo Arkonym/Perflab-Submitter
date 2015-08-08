@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %} {{ page_name }} {% endblock %}
+{% block external %}
+<script type="text/javascript" src="site_media/prototype.js"></script>
+<script>
+
+window.onload=function update()
+{
+    var myVar = new Ajax.PeriodicalUpdater('position', '/position', { 
+      method: 'get', 
+      frequency: 1,
+      onSuccess: function(transport){
+          var response = transport.responseText || "no response text";
+          //alert("Success! \n\n" + response);
+          // compare response with 'Stop' 
+          if(response == 'Stop') {
+             window.location.href ='/finished';
+             myVar.stop();            
+          }
+        },
+        onFailure: function(){ alert('Something went wrong...') }
+    });	  
+}
+</script>
+{% endblock %}
+{% block head %}
+Waiting to run Perflab
+{% endblock %}
+{% block content %}
+
+<h3>Position in Queue:</h3>
+<div id="position">(fetching position ...)</div>
+
+{% endblock %}
