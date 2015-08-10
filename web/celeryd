@@ -24,7 +24,7 @@ DJANGO_SETTINGS_MODULE='perfproject.settings'
 
 # Extra command-line arguments to the worker
 # Change to number of RPis on production
-CELERYD_OPTS="--concurrency=1"
+CELERYD_OPTS="--concurrency=24"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/var/log/celery/%N.log"

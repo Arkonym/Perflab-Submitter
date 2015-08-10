@@ -107,7 +107,7 @@ USE_TZ = True
 # Celery settings
 BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERYD_CONCURRENCY = 1
+CELERYD_CONCURRENCY = 24
 
 
 # Static files (CSS, JavaScript, Images)

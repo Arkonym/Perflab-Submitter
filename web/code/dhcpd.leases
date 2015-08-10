@@ -473,3 +473,599 @@ lease 10.102.102.11 {
   uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
   client-hostname "rpi3";
 }
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:06:36;
+  ends 1 2015/08/10 22:16:36;
+  cltt 1 2015/08/10 22:06:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:06:52;
+  ends 1 2015/08/10 22:16:52;
+  cltt 1 2015/08/10 22:06:52;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:07:08;
+  ends 1 2015/08/10 22:17:08;
+  cltt 1 2015/08/10 22:07:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:07:11;
+  ends 1 2015/08/10 22:17:11;
+  cltt 1 2015/08/10 22:07:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:07:12;
+  ends 1 2015/08/10 22:17:12;
+  cltt 1 2015/08/10 22:07:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:07:14;
+  ends 1 2015/08/10 22:17:14;
+  cltt 1 2015/08/10 22:07:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:11:36;
+  ends 1 2015/08/10 22:21:36;
+  cltt 1 2015/08/10 22:11:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:11:55;
+  ends 1 2015/08/10 22:21:55;
+  cltt 1 2015/08/10 22:11:55;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:12:08;
+  ends 1 2015/08/10 22:22:08;
+  cltt 1 2015/08/10 22:12:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:12:11;
+  ends 1 2015/08/10 22:22:11;
+  cltt 1 2015/08/10 22:12:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:12:12;
+  ends 1 2015/08/10 22:22:12;
+  cltt 1 2015/08/10 22:12:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:12:14;
+  ends 1 2015/08/10 22:22:14;
+  cltt 1 2015/08/10 22:12:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:16:36;
+  ends 1 2015/08/10 22:26:36;
+  cltt 1 2015/08/10 22:16:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:16:58;
+  ends 1 2015/08/10 22:26:58;
+  cltt 1 2015/08/10 22:16:58;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:17:08;
+  ends 1 2015/08/10 22:27:08;
+  cltt 1 2015/08/10 22:17:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:17:11;
+  ends 1 2015/08/10 22:27:11;
+  cltt 1 2015/08/10 22:17:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:17:12;
+  ends 1 2015/08/10 22:27:12;
+  cltt 1 2015/08/10 22:17:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:17:14;
+  ends 1 2015/08/10 22:27:14;
+  cltt 1 2015/08/10 22:17:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:21:36;
+  ends 1 2015/08/10 22:31:36;
+  cltt 1 2015/08/10 22:21:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:22:01;
+  ends 1 2015/08/10 22:32:01;
+  cltt 1 2015/08/10 22:22:01;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:22:08;
+  ends 1 2015/08/10 22:32:08;
+  cltt 1 2015/08/10 22:22:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:22:11;
+  ends 1 2015/08/10 22:32:11;
+  cltt 1 2015/08/10 22:22:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:22:12;
+  ends 1 2015/08/10 22:32:12;
+  cltt 1 2015/08/10 22:22:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:22:14;
+  ends 1 2015/08/10 22:32:14;
+  cltt 1 2015/08/10 22:22:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:26:36;
+  ends 1 2015/08/10 22:36:36;
+  cltt 1 2015/08/10 22:26:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:27:04;
+  ends 1 2015/08/10 22:37:04;
+  cltt 1 2015/08/10 22:27:04;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:27:08;
+  ends 1 2015/08/10 22:37:08;
+  cltt 1 2015/08/10 22:27:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:27:11;
+  ends 1 2015/08/10 22:37:11;
+  cltt 1 2015/08/10 22:27:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:27:12;
+  ends 1 2015/08/10 22:37:12;
+  cltt 1 2015/08/10 22:27:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:27:14;
+  ends 1 2015/08/10 22:37:14;
+  cltt 1 2015/08/10 22:27:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:31:36;
+  ends 1 2015/08/10 22:41:36;
+  cltt 1 2015/08/10 22:31:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:32:07;
+  ends 1 2015/08/10 22:42:07;
+  cltt 1 2015/08/10 22:32:07;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:32:08;
+  ends 1 2015/08/10 22:42:08;
+  cltt 1 2015/08/10 22:32:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:32:11;
+  ends 1 2015/08/10 22:42:11;
+  cltt 1 2015/08/10 22:32:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:32:12;
+  ends 1 2015/08/10 22:42:12;
+  cltt 1 2015/08/10 22:32:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:32:14;
+  ends 1 2015/08/10 22:42:14;
+  cltt 1 2015/08/10 22:32:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:36:36;
+  ends 1 2015/08/10 22:46:36;
+  cltt 1 2015/08/10 22:36:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:37:08;
+  ends 1 2015/08/10 22:47:08;
+  cltt 1 2015/08/10 22:37:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:37:10;
+  ends 1 2015/08/10 22:47:10;
+  cltt 1 2015/08/10 22:37:10;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:37:11;
+  ends 1 2015/08/10 22:47:11;
+  cltt 1 2015/08/10 22:37:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:37:12;
+  ends 1 2015/08/10 22:47:12;
+  cltt 1 2015/08/10 22:37:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:37:14;
+  ends 1 2015/08/10 22:47:14;
+  cltt 1 2015/08/10 22:37:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:41:36;
+  ends 1 2015/08/10 22:51:36;
+  cltt 1 2015/08/10 22:41:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:42:08;
+  ends 1 2015/08/10 22:52:08;
+  cltt 1 2015/08/10 22:42:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:42:11;
+  ends 1 2015/08/10 22:52:11;
+  cltt 1 2015/08/10 22:42:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:42:12;
+  ends 1 2015/08/10 22:52:12;
+  cltt 1 2015/08/10 22:42:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:42:13;
+  ends 1 2015/08/10 22:52:13;
+  cltt 1 2015/08/10 22:42:13;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:42:14;
+  ends 1 2015/08/10 22:52:14;
+  cltt 1 2015/08/10 22:42:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:46:36;
+  ends 1 2015/08/10 22:56:36;
+  cltt 1 2015/08/10 22:46:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}
+lease 10.102.102.15 {
+  starts 1 2015/08/10 22:47:08;
+  ends 1 2015/08/10 22:57:08;
+  cltt 1 2015/08/10 22:47:08;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:7f:90:31;
+  uid "\377\353\177\2201\000\001\000\001\034\335``\270'\353\177\2201";
+  client-hostname "rpi13";
+}
+lease 10.102.102.13 {
+  starts 1 2015/08/10 22:47:11;
+  ends 1 2015/08/10 22:57:11;
+  cltt 1 2015/08/10 22:47:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:92:a4:18;
+  uid "\377\353\222\244\030\000\001\000\001\034\335`_\270'\353\222\244\030";
+  client-hostname "rpi12";
+}
+lease 10.102.102.12 {
+  starts 1 2015/08/10 22:47:12;
+  ends 1 2015/08/10 22:57:12;
+  cltt 1 2015/08/10 22:47:12;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:02:c1;
+  uid "\377\353m\002\301\000\001\000\001\034\335``\270'\353m\002\301";
+  client-hostname "rpi14";
+}
+lease 10.102.102.11 {
+  starts 1 2015/08/10 22:47:14;
+  ends 1 2015/08/10 22:57:14;
+  cltt 1 2015/08/10 22:47:14;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:1a:54:03;
+  uid "\377\353\032T\003\000\001\000\001\034\335``\270'\353\032T\003";
+  client-hostname "rpi3";
+}
+lease 10.102.102.10 {
+  starts 1 2015/08/10 22:47:16;
+  ends 1 2015/08/10 22:57:16;
+  cltt 1 2015/08/10 22:47:16;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:1a:a1:e5:c4:40;
+  uid "\000cisco-001a.a1e5.c440-Vl1";
+}
+lease 10.102.102.14 {
+  starts 1 2015/08/10 22:51:36;
+  ends 1 2015/08/10 23:01:36;
+  cltt 1 2015/08/10 22:51:36;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet b8:27:eb:6d:d6:98;
+  uid "\377\353m\326\230\000\001\000\001\034\335`_\270'\353m\326\230";
+  client-hostname "rpi15";
+}

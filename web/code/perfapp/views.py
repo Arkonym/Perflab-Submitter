@@ -180,7 +180,7 @@ def grade(request):
     red.incr('servers')
     try:
         response = results.get()
-        print response
+        #print response
         #response = str(results.traceback)
     except:
         ##Page/request will display ERROR if something fails in getting the celery results
