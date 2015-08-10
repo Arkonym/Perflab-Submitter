@@ -15,9 +15,8 @@ import sys,os,subprocess
 from subprocess import Popen,PIPE
 from redis import Redis
 red = Redis(host='redis2', port=6379)
-red.set('servers',1)
-red.set('per',0)
 
+from perfapp.dhcp import *
 
 from datetime import datetime
 
@@ -148,18 +147,23 @@ def get_celery_worker_status():
 
     
 def init(request):
-    red.set('servers',1)
+    red.set('servers',0)
     servers.objects.all().delete()
-    #Replace w/ code that parses leases file
-    file = open("/code/test.txt","r+")
-    for line in file:
-        line = line.split(",")[0].rstrip().lstrip()
-        entry = servers(ip=line)
-        entry.save()
-    server = servers.objects.all()
-    for serv in server:
-        print serv.ip
-    return HttpResponse("Done")
+    myfile = open("/code/dhcpd.leases", 'r')
+    leases = parse_leases_file(myfile)
+    myfile.close()
+    
+    now = timestamp_now()
+    report_dataset = select_active_leases(leases, now)
+    #print len(report_dataset)
+    for lease in report_dataset:
+        if "rpi" in lease['client-hostname']:
+            red.incr('servers')
+            ip = str(lease['ip_address'])
+            #print ip
+            entry = servers(ip=ip, hostname=lease['client-hostname'])
+            entry.save()
+    return HttpResponse("Done: " + str(red.get('servers')))
 
 ## Request processed after Celery task finishes and will display the results of that task back to the user    
 def grade(request):
@@ -171,6 +175,7 @@ def grade(request):
     results = runLab.AsyncResult(taskid)
     with transaction.atomic():
         server.inUse=False
+        server.csrf=""
         server.save()
     red.incr('servers')
     try:
