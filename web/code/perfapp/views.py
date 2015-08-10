@@ -146,25 +146,6 @@ def get_celery_worker_status():
         d = { ERROR_KEY: str(e)}
     return d
 
-def test(request):
-    response = render(request, 'test2.html')
-    return response
-    #a="celery -A perfproject inspect stats"    
-    #b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-    #b.wait()
-    #c = b.stdout.read()
-    #print c
-    #print get_celery_worker_status()
-    if int(red.get('servers'))>0:
-        toReturn = "There are " + red.get('servers') + " servers"
-        red.decr('servers')
-        taskid = testing.delay(int(red.get('servers'))+1)
-        taskid.wait()
-        toReturn = taskid.get()
-        #testing("test")
-    else:
-        toReturn = "No Servers"
-    return HttpResponse(toReturn)
     
 def init(request):
     red.set('servers',1)
@@ -256,23 +237,3 @@ def getServer(request):
     else:
         return HttpResponse("No Servers")
 
-def test2(request):
-    print red.get('servers')
-    if int(red.get('servers'))>0: 
-        red.decr('servers')       
-        return HttpResponse("Server Acquired")
-    else:
-        return HttpResponse("No Servers")
-
-def test3(request):
-    red.incr('servers')
-    return HttpResponse("Done")
-
-def test4(request):
-    if int(red.get('per'))>100:
-        toReturn = "Stop"
-        red.set('per',0)
-    else:
-        toReturn = red.get('per')
-        red.incr('per',5)
-    return HttpResponse(toReturn)
