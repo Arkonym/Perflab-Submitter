@@ -6,7 +6,6 @@ var pageStates = Object.freeze({
 
 var state = pageStates.INITIAL
 
-
 var ExampleApplication = React.createClass({
     getInitialState: function() {
         return {
@@ -22,16 +21,11 @@ var ExampleApplication = React.createClass({
                 alert("No available Rasberry Pi 2's, please wait a moment and resubmit");
             }
             else{
-                state = pageStates.SUBMITTED;
-                $.ajax({
-                  url: this.props.source2,
-                  success: function(data) {
-                    this.setState({content: data});
-                    state = pageStates.PERIODIC
-                    
-                  }.bind(this),
-                  
-                });
+                state = pageStates.PERIODIC;
+                React.render(
+                    <p>Running code please be patient</p>,
+                    document.getElementById('title'));
+                document.title = "CSCI540 | Running Code";
             }
           }.bind(this)
         });
@@ -45,6 +39,23 @@ var ExampleApplication = React.createClass({
     }  
 });
 
+var gradeApplication = React.createClass({
+    getInitialState: function() {
+        return {
+        content: 'Getting Performance Score',
+        };
+    },
+    render: function() {
+        
+        return (
+          <div>
+            {this.state.content}
+          </div>
+        );
+    }  
+});
+
+
 var HelloWorld = React.createClass({
   render: function() {
     return (
@@ -55,6 +66,9 @@ var HelloWorld = React.createClass({
     );
   }
 });
+
+
+
 
 var CircularProgress = React.createClass({
     getDefaultProps: function() {
@@ -110,6 +124,8 @@ var CircularProgress = React.createClass({
     }
 });
 
+
+
 var InputDemo = React.createClass({
     getInitialState: function() {
         return {
@@ -131,40 +147,94 @@ var InputDemo = React.createClass({
     }
 });
 
+var splitText = React.createClass({
+    getInitialState: function() {
+        return {
+            data: this.props.data
+        };
+    },
+    render: function() {
+        {this.props.data.text.split("\n").map(function(item) {
+          return (
+            <span>
+              {item}
+              <br/>
+            </span>
+          )
+        })};
+        return (
+            <div className="Percentage">
+                <div>
+                <h2>Percentage Complete</h2>
+                </div>
+                <CircularProgress
+                    strokeWidth="10"
+                    r="80"
+                    percentage={this.props.per}/>
+            </div>
+        );
+    }
+});
+
 
 /*React.render(<InputDemo/>,
     document.getElementById('container'));*/
 
 
 var percentage = 0;
-var update = setInterval(function() {
-    $.ajax({
-      url: "/test4",
+
+
+
+
+React.render(
+  <ExampleApplication source="/server" />,
+  document.getElementById('container')
+);
+
+
+
+update = setInterval(function() {
+    if(state==pageStates.PERIODIC){
+      $.ajax({
+      url: "/wupdate",
       success: function(data) {
-        React.render(
-        <InputDemo per={parseInt(data)}/>,
-            document.getElementById('container'));
-        if(parseInt(data) == 100){
+        
+        if(data == "Stop"){
             clearInterval(update);
-            //Load Results
+            $.ajax({
+              url: "/grade",
+              success: function(data) {
+                  //var d = data;           
+                  React.render(
+                    <p>Graded Results</p>,
+                    document.getElementById('title'));
+                  document.title = "CSCI540 | Finished"; 
+                  if(data=="ERROR"){
+                      React.render(
+                      <div>Something went wrong.</div>,
+                    document.getElementById('container'));
+                  }
+                  else{
+                      React.render(
+                          <div id="grades">{ data }</div>,
+                          document.getElementById('container')
+                        );
+                  }
+                  
+                  
+                           
+              }.bind(this)
+            });
+        }
+        else{
+            React.render(
+            <InputDemo per={parseInt(data)}/>,
+                document.getElementById('container'));
         }
       }.bind(this),
       
     });
-    
-}, 500);
 
-/*React.render(
-  <ExampleApplication source="/test2" source2="/test3"/>,
-  document.getElementById('container')
-)
-
-setInterval(function() {
-    if(state==pageStates.PERIODIC){
-      React.render(
-        <HelloWorld date={new Date()} />,
-        document.getElementById('container')
-      );
     }
 }, 500);
 /*var start = new Date().getTime();

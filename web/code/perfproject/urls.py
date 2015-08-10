@@ -28,4 +28,8 @@ urlpatterns = [
     url(r'^test2$','perfapp.views.test2'),
     url(r'^test3$','perfapp.views.test3'),
     url(r'^test4$','perfapp.views.test4'),
+    url(r'^init$','perfapp.views.init'),
+    url(r'^server$','perfapp.views.getServer'),
+    url(r'^wupdate$','perfapp.views.wupdate'),
+    url(r'^grade$','perfapp.views.grade'),
 ]

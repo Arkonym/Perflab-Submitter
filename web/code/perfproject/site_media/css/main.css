@@ -31,3 +31,8 @@ html, body, #container {
 .Percentage {
     margin-left: 30px;
 }
+
+#grades {
+    margin-left: 30px;
+    white-space: pre;
+}
