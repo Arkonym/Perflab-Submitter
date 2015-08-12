@@ -228,8 +228,9 @@ def getServer(request):
         if int(red.get('servers'))>0:
             red.decr('servers')
             ip = server.ip
+            host = server.hostname
             print ip
-            task = runLab.delay(csrf,ip)
+            task = runLab.delay(csrf,ip,host)
             #print server.ip
             server.csrf = csrf
             server.task = str(task)

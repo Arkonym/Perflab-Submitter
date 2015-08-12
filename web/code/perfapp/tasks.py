@@ -20,7 +20,7 @@ def testing(count):
     return count
     
 @task
-def runLab(csrf,server):
+def runLab(csrf,server,hostname):
     current_task.update_state(state='PROGRESS', meta={'current': 0, 'total': 100})
     toReturn = ""
     try:
@@ -68,6 +68,8 @@ def runLab(csrf,server):
         c = b.stdout.read()
         e = b.stderr.read()
         if len(e)>0:
+            if "Error" in e:
+                return e
             #print e
             if not "ECDSA" in e:
                 return e
@@ -92,10 +94,11 @@ def runLab(csrf,server):
                     scores = scores + [score]
                     gauss = gauss + [score]
                     status = status + increment 
-                    count = count + 1            
+                    count = count + 1   
+                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})         
             except:
-                return None
-            current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                return "gauss " + str(sys.exc_info()) + " " + hostname
+            
         #AVG
         count = 0 
         avg = []   
@@ -111,10 +114,11 @@ def runLab(csrf,server):
                     scores = scores + [score]
                     avg = avg + [score]
                     status = status + increment 
-                    count = count + 1           
+                    count = count + 1    
+                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})       
             except:
-                return None
-            current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                return "avg " + str(sys.exc_info())+ " " + hostname
+            
         #HLINE
         count = 0 
         hline = []   
@@ -130,10 +134,11 @@ def runLab(csrf,server):
                     scores = scores + [score]
                     hline = hline + [score]
                     status = status + increment 
-                    count = count + 1           
+                    count = count + 1
+                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})           
             except:
-                return None
-            current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                return "hline " + str(sys.exc_info()) + " " + hostname
+            
         #EMBOSS
         count = 0 
         emboss = []   
@@ -151,11 +156,12 @@ def runLab(csrf,server):
                     scores = scores + [score]
                     emboss = emboss + [score]
                     status = status + increment 
-                    count = count + 1           
+                    count = count + 1       
+                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})    
             except:
-                print e
-                return None
-            current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                #print e
+                return  "emboss " + str(sys.exc_info()) + " " + hostname
+            
         scores.sort()
         #print scores
         
@@ -180,9 +186,9 @@ def runLab(csrf,server):
         toReturn += "\nmedian CPE is " + str(int(cpe)) + " "
         if cpe > 4000:
             score = 0
-        else:
-            score = math.log(cpe) * -17 + 217
-            if score > 110:
+        else: 
+            score = math.log(6000-cpe) * 46.93012749-305.91731341
+            if score > 100:
                 score = 110
         score = int(score)
         toReturn +="\nResulting score is " + str(score) + "\n"
