@@ -17,6 +17,16 @@ RUN chown celery:celery -R /home/celery/.ssh
 
 
 CMD supervisord -c /etc/supervisor/supervisord.conf
+
+USER celery
+RUN chmod 400 /home/celery/.ssh/id_rsa
+
+USER root
+
+
+
+
+
 #ADD celeryd /etc/default/
 #ADD initd /etc/init.d/celeryd
 #RUN chmod 755 /etc/init.d/celeryd

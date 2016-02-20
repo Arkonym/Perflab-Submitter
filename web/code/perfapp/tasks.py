@@ -84,12 +84,15 @@ def runLab(csrf,server,hostname):
         count = 0    
         while count < tests:
             a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./gauss.sh\""
+            print a
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read()
             line = c.split()
             try:
+                print line
                 score = float(line[-1])
+                print score
                 if not score > 9000 and not score <=0: # Check for and ignore odd scores
                     scores = scores + [score]
                     gauss = gauss + [score]
@@ -97,7 +100,7 @@ def runLab(csrf,server,hostname):
                     count = count + 1   
                     current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})         
             except:
-                return "gauss " + str(sys.exc_info()) + " " + hostname
+                return "gauss " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read())
             
         #AVG
         count = 0 

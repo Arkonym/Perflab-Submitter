@@ -158,11 +158,20 @@ def init(request):
     #print len(report_dataset)
     for lease in report_dataset:
         if "rpi" in lease['client-hostname']:
-            red.incr('servers')
-            ip = str(lease['ip_address'])
-            #print ip
-            entry = servers(ip=ip, hostname=lease['client-hostname'])
-            entry.save()
+            a="ssh -i /home/celery/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+lease['ip_address']+ " \"cat /proc/modules | grep aprofile\""
+            print a
+            b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+            b.wait()
+            c = b.stdout.read()
+            print b.stderr.read()
+            print c
+            if "aprofile" in c:
+                print c
+                red.incr('servers')
+                ip = str(lease['ip_address'])
+                #print ip
+                entry = servers(ip=ip, hostname=lease['client-hostname'])
+                entry.save()
     return HttpResponse("Done: " + str(red.get('servers')))
 
 ## Request processed after Celery task finishes and will display the results of that task back to the user    

@@ -227,7 +227,7 @@ def select_active_leases(leases_db, as_of_ts):
 ##############################################################################
 
 
-myfile = open('/code/dhcpd.leases', 'r')
+myfile = open('/var/lib/dhcp/dhcpd.leases', 'r')
 leases = parse_leases_file(myfile)
 myfile.close()
 

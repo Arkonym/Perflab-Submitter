@@ -1,0 +1,5 @@
+Makefile Y
+Filter.cpp Y
+Filter.h Y
+cs1300bmp.cc Y
+cs1300bmp.h Y

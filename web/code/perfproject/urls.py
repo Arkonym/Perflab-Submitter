@@ -16,16 +16,21 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from django.views.static import serve
+
 import os.path
 site_media = os.path.join(os.path.dirname(__file__), 'site_media')
+
+from perfapp import views as perfapp
+
 
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'site_media/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': site_media}),
-    url(r'^$', 'perfapp.views.home'),
-    url(r'^init$','perfapp.views.init'),
-    url(r'^server$','perfapp.views.getServer'),
-    url(r'^wupdate$','perfapp.views.wupdate'),
-    url(r'^grade$','perfapp.views.grade'),
+    url(r'site_media/(?P<path>.*)$', serve, { 'document_root': site_media}),
+    url(r'^$', perfapp.home),
+    url(r'^init$',perfapp.init),
+    url(r'^server$',perfapp.getServer),
+    url(r'^wupdate$',perfapp.wupdate),
+    url(r'^grade$',perfapp.grade),
 ]
