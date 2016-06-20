@@ -178,33 +178,35 @@ def init(request):
 def grade(request):
     csrf = str(request.COOKIES['csrftoken'])
     server = servers.objects.all().filter(csrf=csrf)
-    server = server[0]
-    taskid = server.task
-    #context = RequestContext(request)
-    results = runLab.AsyncResult(taskid)
-    with transaction.atomic():
-        server.inUse=False
-        server.csrf=""
-        server.save()
-    red.incr('servers')
-    try:
-        response = results.get()
-        #print response
-        #response = str(results.traceback)
-    except:
-        ##Page/request will display ERROR if something fails in getting the celery results
-        return HttpResponse("ERROR")
+    if len(server)>0:
+        server = server[0]
+        taskid = server.task
+        #context = RequestContext(request)
+        results = runLab.AsyncResult(taskid)
+        with transaction.atomic():
+            server.inUse=False
+            server.csrf=""
+            server.save()
+        red.incr('servers')
+        try:
+            response = results.get()
+            #print response
+            #response = str(results.traceback)
+        except:
+            ##Page/request will display ERROR if something fails in getting the celery results
+            return HttpResponse("ERROR")
+        
+        ##Chunck of code to remove submitted files from server so they don't eat up space
+        csrf = str(request.COOKIES['csrftoken'])
+        os.chdir('/code/uploads/')
+        a="rm -rf ./"+str(csrf).rstrip().lstrip()
+        b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+        b.wait()
+        c = b.stdout.read()
+        print c
+        return HttpResponse(response)
+    return HttpResponse("Error in Grading")
     
-    ##Chunck of code to remove submitted files from server so they don't eat up space
-    csrf = str(request.COOKIES['csrftoken'])
-    os.chdir('/code/uploads/')
-    a="rm -rf ./"+str(csrf).rstrip().lstrip()
-    b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-    b.wait()
-    c = b.stdout.read()
-    print c
-    
-    return HttpResponse(response)
 
 def wupdate(request):
     csrf = str(request.COOKIES['csrftoken'])
