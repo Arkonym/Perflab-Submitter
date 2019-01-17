@@ -148,30 +148,23 @@ def get_celery_worker_status():
     
 def init(request):
     red.set('servers',0)
-    servers.objects.all().delete()
-    myfile = open("/code/dhcpd.leases", 'r')
-    leases = parse_leases_file(myfile)
-    myfile.close()
-    
-    now = timestamp_now()
-    report_dataset = select_active_leases(leases, now)
-    #print len(report_dataset)
-    for lease in report_dataset:
-        if "rpi" in lease['client-hostname']:
-            a="ssh -i /home/celery/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+lease['ip_address']+ " \"cat /proc/modules | grep aprofile\""
-            print a
-            b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-            b.wait()
-            c = b.stdout.read()
-            print b.stderr.read()
-            print c
-            if "aprofile" in c:
-                print c
-                red.incr('servers')
-                ip = str(lease['ip_address'])
-                #print ip
-                entry = servers(ip=ip, hostname=lease['client-hostname'])
-                entry.save()
+    servers.objects.all().delete() 
+    initial = 11
+    for lease in range(24):
+      a="ssh -i /home/celery/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@192.168.1."+str(initial+lease)+ " \"cat /proc/modules | grep aprofile\""
+      print a
+      b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+      b.wait()
+      c = b.stdout.read()
+      print b.stderr.read()
+      print c
+      if "aprofile" in c:
+          print c
+          red.incr('servers')
+          ip = "192.168.1."+str(initial+lease)
+          #print ip
+          entry = servers(ip=ip, hostname="rpi"+str(lease+1))
+          entry.save()
     return HttpResponse("Done: " + str(red.get('servers')))
 
 ## Request processed after Celery task finishes and will display the results of that task back to the user    

@@ -237,12 +237,17 @@ myfile.close()
 now = timestamp_now()
 report_dataset = select_active_leases(leases, now)
 
+#print len(report_dataset)
 
-for lease in report_dataset:
-    if "rpi" in lease['client-hostname']:
-        a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@"+lease['ip_address']+ " \"cd udoo; sudo insmod aprofile.ko\""
-        print a
-        b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-        b.wait()
-        c = b.stdout.read()
+#for lease in report_dataset:
+#    print lease
+
+# 
+initial = 11
+for lease in range(24):
+  a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@192.168.1."+str(initial+lease)+ " \"cd udoo; sudo insmod aprofile.ko\""
+  print a
+  b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+  b.wait()
+  c = b.stdout.read()
         

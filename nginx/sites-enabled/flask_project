@@ -1,14 +1,17 @@
 server {
 
     listen 80;
-    server_name example.org;
+    server_name csciperfproject.csuchico.edu;
     charset utf-8;
     
-#    listen 443 ssl;
+    listen 443 ssl;
     
-#    ssl_certificate /etc/nginx/ssl/nginx.crt;
-#    ssl_certificate_key /etc/nginx/ssl/nginx.key;
-
+    ssl on;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    ssl_prefer_server_ciphers on;
+    ssl_protocols SSLv3 TLSv1;
+ 
     location /static {
         alias /usr/src/app/static;
     }

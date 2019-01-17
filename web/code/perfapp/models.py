@@ -8,3 +8,6 @@ class servers (models.Model):
     task = models.CharField(max_length=100, default="")
     csrf = models.CharField(max_length=100, default="")
     inUse = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.hostname + " " + self.ip + " " + str(self.inUse)

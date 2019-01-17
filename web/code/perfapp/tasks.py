@@ -190,8 +190,9 @@ def runLab(csrf,server,hostname):
         if cpe > 4000:
             score = 0
         else: 
-            score = math.log(6000-cpe) * 46.93012749-305.91731341
-            if score > 100:
+            #score = math.log(6000-cpe) * 46.93012749-305.91731341
+            score = 119.653*math.exp(-0.001196*cpe) 
+            if score > 110:
                 score = 110
         score = int(score)
         toReturn +="\nResulting score is " + str(score) + "\n"

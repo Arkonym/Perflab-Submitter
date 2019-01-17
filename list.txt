@@ -1,0 +1,130 @@
+# Sample /etc/dhcpd.conf
+# (add your comments here) 
+default-lease-time 600;
+max-lease-time 7200;
+option subnet-mask 255.255.255.0;
+option broadcast-address 192.168.1.255;
+option routers 192.168.1.1;
+option domain-name-servers 8.8.8.8, 8.8.4.4;
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+    range 192.168.1.40 192.168.1.200;
+
+    host rpi1 {
+        hardware ethernet b8:27:eb:bf:f3:f7;
+        fixed-address 192.168.1.11;
+    }
+
+    host rpi10 {
+        hardware ethernet b8:27:eb:ab:d2:1a;
+        fixed-address 192.168.1.20;
+    }
+
+    host rpi11 {
+        hardware ethernet b8:27:eb:29:f6:26;
+        fixed-address 192.168.1.21;
+    }
+
+    host rpi12 {
+        hardware ethernet b8:27:eb:92:a4:18;
+        fixed-address 192.168.1.22;
+    }
+
+    host rpi13 {
+        hardware ethernet b8:27:eb:7f:90:31;
+        fixed-address 192.168.1.23;
+    }
+
+    host rpi14 {
+        hardware ethernet b8:27:eb:6d:02:c1;
+        fixed-address 192.168.1.24;
+    }
+
+    host rpi16 {
+        hardware ethernet b8:27:eb:2b:a2:75;
+        fixed-address 192.168.1.26;
+    }
+
+    host rpi17 {
+        hardware ethernet b8:27:eb:a4:85:cd;
+        fixed-address 192.168.1.27;
+    }
+
+    host rpi18 {
+        hardware ethernet b8:27:eb:13:a5:c5;
+        fixed-address 192.168.1.28;
+    }
+
+    host rpi19 {
+        hardware ethernet b8:27:eb:03:41:2b;
+        fixed-address 192.168.1.29;
+    }
+
+    host rpi2 {
+        hardware ethernet b8:27:eb:2b:f5:1d;
+        fixed-address 192.168.1.12;
+    }
+
+    host rpi20 {
+        hardware ethernet b8:27:eb:4e:a3:23;
+        fixed-address 192.168.1.30;
+    }
+
+    host rpi21 {
+        hardware ethernet b8:27:eb:a6:6b:66;
+        fixed-address 192.168.1.31;
+    }
+
+    host rpi22 {
+        hardware ethernet b8:27:eb:3a:e6:33;
+        fixed-address 192.168.1.32;
+    }
+
+    host rpi23 {
+        hardware ethernet b8:27:eb:c2:89:9a;
+        fixed-address 192.168.1.33;
+    }
+
+    host rpi24 {
+        hardware ethernet b8:27:eb:74:99:6d;
+        fixed-address 192.168.1.34;
+    }
+
+    host rpi3 {
+        hardware ethernet b8:27:eb:1a:54:03;
+        fixed-address 192.168.1.13;
+    }
+
+    host rpi4 {
+        hardware ethernet b8:27:eb:61:15:58;
+        fixed-address 192.168.1.14;
+    }
+
+    host rpi5 {
+        hardware ethernet b8:27:eb:af:4b:33;
+        fixed-address 192.168.1.15;
+    }
+
+    host rpi6 {
+        hardware ethernet b8:27:eb:dc:63:41;
+        fixed-address 192.168.1.16;
+    }
+
+    host rpi7 {
+        hardware ethernet b8:27:eb:88:06:d3;
+        fixed-address 192.168.1.17;
+    }
+
+    host rpi8 {
+        hardware ethernet b8:27:eb:bf:80:91;
+        fixed-address 192.168.1.18;
+    }
+
+    host rpi9 {
+        hardware ethernet b8:27:eb:ae:e5:11;
+        fixed-address 192.168.1.19;
+    }
+
+
+
+}
