@@ -8,13 +8,17 @@ services:
     command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     links:
       - redis
+    volumes:
+      - ./web/:/code/
     ports:
       - "8000:8000"
     depends_on:
       - redis
       
   celery:
-    build: ./web
+    build: 
+      context: ./web
+      dockerfile: CeleryDockerfile
     command: celery -A perfproject worker -l info
     links:
       - redis
@@ -22,7 +26,9 @@ services:
       - redis
       
   celery-beat:
-    build: ./web
+    build: 
+      context: ./web
+      dockerfile: CeleryDockerfile
     command: celery -A perfproject beat -l info
     links:
       - redis

@@ -4,16 +4,4 @@ RUN mkdir /code
 WORKDIR /code
 ADD requirements.txt /code/
 RUN pip install -r requirements.txt
-RUN groupadd -r celery && useradd -r -g celery celery
-RUN mkdir /home/celery/
-RUN mkdir /home/celery/.ssh
-RUN chown celery:celery -R /home/celery/
-ADD id_rsa.pub /home/celery/.ssh/id_rsa.pub
-ADD id_rsa /home/celery/.ssh/id_rsa
-RUN chown celery:celery -R /home/celery/.ssh
-ADD . /home/celery
-RUN chown celery:celery -R /home/celery
-WORKDIR /home/celery
-USER celery
-RUN chmod 400 /home/celery/.ssh/id_rsa
 
