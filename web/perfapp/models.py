@@ -29,7 +29,7 @@ class Attempt(models.Model):
         return self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(score)+ ")"
 
 
-class Job(models.Model):
+class Jobs(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10)

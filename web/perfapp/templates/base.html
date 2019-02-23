@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="UTF-8">
+		<title>EECE320 | {% block title %} {% endblock %}</title>
+		{% block external %}{% endblock %}
+		<link rel="icon"
+            type="image/ico"
+            href="site_media/img/favicon.ico">
+        <link rel="stylesheet" href="site_media/css/main.css">
+	</head>
+	<body>
+		<h1>{% block head %}{{page_title}}{% endblock %}</h1>
+		{% block content %}{{body}}{% endblock %}
+	</body>
+	<footer>
+<!-- 	<a href="" target="_blank">Leave Feedback</a> -->
+	</footer>
+</html>

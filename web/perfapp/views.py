@@ -49,7 +49,11 @@ def handle_upload(f, name, token):
 # Create your views here.
 
 def home(request):
-    pass
+    context={
+        "body": "This is the body",
+        "page_title": "This is the page title"
+    }
+    return render(request, "base.html", context=context)
 
 def profile(request):
     pass
