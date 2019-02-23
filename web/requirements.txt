@@ -1,8 +1,11 @@
 amqp==2.4.0
 billiard==3.5.0.5
 celery==4.2.1
-Django==2.1.5
+Django==2.1.7
 kombu==4.2.2.post1
 pytz==2018.9
 redis==3.1.0
 vine==1.2.0
+djangosaml2==0.17.2
+djangosaml2[test]
+django-tables2==2.0.4

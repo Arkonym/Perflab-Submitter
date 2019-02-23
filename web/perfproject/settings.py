@@ -11,10 +11,96 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import saml2
+import saml2.saml
 from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+SAML_CONFIG={
+    'xmlsec_binary':'/usr/bin/xmlsec1',
+    'entityid':'csciperfproject.csuchico.edu/saml2/metadata/',
+    'attribute_map_dir':path.join(BASE_DIR, 'attribute_maps'),
+    # this block states what services we provide
+    'service': {
+    # we are just a lonely SP
+        'sp' : {
+            'name': 'CSU CHICO',
+            'name_id_format': saml2.saml.NAMEID_FORMAT_PERSISTENT,
+            'endpoints': {
+                # url and binding to the assetion consumer service view
+                # do not change the binding or service name
+                'assertion_consumer_service': [
+                ('http://localhost:8000/saml2/acs/',saml2.BINDING_HTTP_POST),
+                ],
+                # url and binding to the single logout service view
+                # do not change the binding or service name
+                'single_logout_service': [
+                    ('http://localhost:8000/saml2/ls/',saml2.BINDING_HTTP_REDIRECT),
+                    ('http://localhost:8000/saml2/ls/post',saml2.BINDING_HTTP_POST),
+                ],
+            },
+
+            # attributes that this project need to identify a user
+'           required_attributes': ['uid'],
+
+            # attributes that may be useful to have but not required
+            'optional_attributes': ['eduPersonAffiliation'],
+
+            # in this section the list of IdPs we talk to are defined
+            'idp': {
+            # we do not need a WAYF service since there is
+            # only an IdP defined here. This IdP should be
+            # present in our metadata
+
+                # the keys of this dictionary are entity ids
+                'https://localhost/simplesaml/saml2/idp/metadata.php': {
+                    'single_sign_on_service': {
+                        saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SSOService.php',
+                    },
+                    'single_logout_service': {
+                        saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SingleLogoutService.php',
+                    },
+                },
+            },
+        },
+    },
+
+    # where the remote metadata is stored
+    'metadata': {
+        'local': [path.join(BASEDIR, 'remote_metadata.xml')],
+    },
+
+    # set to 1 to output debugging information
+    'debug': 1,
+
+    # Signing
+    'key_file': path.join(BASEDIR, 'mycert.key'), # private part
+    'cert_file': path.join(BASEDIR, 'mycert.pem'), # public part
+
+    # Encryption
+    'encryption_keypairs': [{
+    'key_file': path.join(BASEDIR, 'my_encryption_key.key'), # private part
+    'cert_file': path.join(BASEDIR, 'my_encryption_cert.pem'), # public part
+    }],
+
+    # own metadata settings
+    'contact_person': [
+        {'given_name': 'Bryan',
+        'sur_name': 'Dixon',
+        'company': 'CSU Chico',
+        'email_address': 'bdixon@csuchico.edu',
+        'contact_type': 'administrative'},
+    ],
+# you can set multilanguage information here
+# 'organization': {
+# 'name': [('Yaco Sistemas', 'es'), ('Yaco Systems', 'en')],
+# 'display_name': [('Yaco', 'es'), ('Yaco', 'en')],
+# 'url': [('http://www.yaco.es', 'es'), ('http://www.yaco.com', 'en')],
+# },
+    'valid_for': 24, # how long is our metadata valid
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +112,7 @@ SECRET_KEY = 'rns6!$0sgc_6_*yeik0eua$ilhm@a#ahnm7&an!y4bnnv7ih+p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -38,7 +124,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djangosaml2',
     'perfapp',
+
 ]
 
 MIDDLEWARE = [
@@ -50,6 +138,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'djangosaml2.backends.Saml2Backend',
+)
 
 ROOT_URLCONF = 'perfproject.urls'
 
@@ -100,7 +193,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+#SAML2
+LOGIN_URL='/saml2/login'
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+SAML_LOGOUT_REQUEST_PREFERRED_BINDING=saml2.BINDING_HTTP_POST
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
