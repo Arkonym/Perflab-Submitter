@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAML_CONFIG={
     'xmlsec_binary':'/usr/bin/xmlsec1',
     'entityid':'csciperfproject.csuchico.edu/saml2/metadata/',
-    'attribute_map_dir':path.join(BASE_DIR, 'attribute_maps'),
+    'attribute_map_dir': os.path.join(BASE_DIR, 'attribute_maps'),
     # this block states what services we provide
     'service': {
     # we are just a lonely SP
@@ -69,20 +69,20 @@ SAML_CONFIG={
 
     # where the remote metadata is stored
     'metadata': {
-        'local': [path.join(BASEDIR, 'remote_metadata.xml')],
+        'local': [os.path.join(BASE_DIR, 'remote_metadata.xml')],
     },
 
     # set to 1 to output debugging information
     'debug': 1,
 
     # Signing
-    'key_file': path.join(BASEDIR, 'mycert.key'), # private part
-    'cert_file': path.join(BASEDIR, 'mycert.pem'), # public part
+    'key_file': os.path.join(BASE_DIR, 'mycert.key'), # private part
+    'cert_file': os.path.join(BASE_DIR, 'mycert.pem'), # public part
 
     # Encryption
     'encryption_keypairs': [{
-    'key_file': path.join(BASEDIR, 'my_encryption_key.key'), # private part
-    'cert_file': path.join(BASEDIR, 'my_encryption_cert.pem'), # public part
+    'key_file': os.path.join(BASE_DIR, 'my_encryption_key.key'), # private part
+    'cert_file': os.path.join(BASE_DIR, 'my_encryption_cert.pem'), # public part
     }],
 
     # own metadata settings
