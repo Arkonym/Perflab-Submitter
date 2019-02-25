@@ -1,5 +1,8 @@
 uploads/
 nginx/ssl/
+nginx.key
+nginx.crt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

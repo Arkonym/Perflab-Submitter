@@ -3,6 +3,7 @@ version: '3'
 services:
   redis:
     image: "redis:alpine"
+    
   web:
     build: ./web
     command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
@@ -10,8 +11,8 @@ services:
       - redis
     volumes:
       - ./web/:/code/
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       - redis
       
@@ -34,4 +35,17 @@ services:
       - redis
     depends_on:
       - redis
+
+  nginx:
+    restart: always
+    build: ./nginx/
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+#     volumes:
+#        - ./code/static:/static
+    links:
+      - web:web
 
