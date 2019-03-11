@@ -5,4 +5,6 @@ from .models import *
 
 admin.site.register(Servers)
 admin.site.register(Jobs)
+admin.site.register(Attempts)
+admin.site.register(Profile)
 #admin.site.regist(User)
