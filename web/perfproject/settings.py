@@ -28,7 +28,7 @@ SECRET_KEY = 'rns6!$0sgc_6_*yeik0eua$ilhm@a#ahnm7&an!y4bnnv7ih+p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ["csciperfproject.csuchico.edu"]
 
 
 # Application definition
