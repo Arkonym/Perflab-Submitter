@@ -14,8 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+import os.path
+site_media = os.path.join(os.path.dirname(__file__), 'site_media')
+#shibsso = os.path.join(os.path.dirname(__file__), 'django-shibsso/shibsso')
+
+from perfapp import views as perfapp
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('perfapp.urls')),
+
 ]

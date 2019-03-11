@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import datetime
-
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 # Create your models here.
 
 class Servers(models.Model):
@@ -11,16 +13,24 @@ class Servers(models.Model):
     def __str__(self):
         return self.hostname + " " + self.ip + " " + str(self.inUse)
 
-class User(models.Model):
-    first_name = models.CharField(max_length=40)
-    last_name = models.CharField(max_length=40)
-    email = models.EmailField
-    max_score = models.IntegerField()
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    last_login =models.DateTimeField()
+    max_score = models.DoubleField()
     #django provides an automatic id field
     def __str__(self):
         return self.last_name
 
-class Attempt(models.Model):
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
+
+class Attempts(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now = True)
     score = models.DecimalField(max_digits=4, decimal_places=2)

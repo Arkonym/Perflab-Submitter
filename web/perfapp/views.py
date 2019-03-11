@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.db.models import F
 from django.db import transaction
 
@@ -17,7 +17,8 @@ from redis import Redis
 red = Redis(host='redis', port=6379)
 
 #from perfapp.dhcp import *
-
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from datetime import datetime
 
 from perfapp.forms import *
@@ -36,8 +37,8 @@ def get_client_ip(request):
 		ip = request.META.get('REMOTE_ADDR')
 	return ip
 
-def handle_upload(f, name, token):
-    path = "/code/uploads/"+str(token).rstrip().lstrip()+"/"+name
+def handle_upload(f, name, uid):
+    path = "/code/uploads/"+str(uid)+"/"+name
     dest = open(path, 'w+')
     if f.multiple_chunks:
         for c in f.chunks():
@@ -49,17 +50,116 @@ def handle_upload(f, name, token):
 # Create your views here.
 
 def home(request):
-    context={
-        "body": "This is the body",
-        "page_title": "This is the page title"
-    }
+    users = models.Profile.objects.all()
+    score_list = []
+    for u in users:
+        score_list+={u.User.id: u.max_score}
     return render(request, "base.html", context=context)
 
-def profile(request):
-    pass
+@login_required(redirect_field_name='/', login_url="/login/")
+def profile(request, user_id):
+    user = User.objects.get(pk=user_id)
+    try:
+        history = models.Attempts.objects.get(pk=user)
+    except:
+        history = []
+    try:
+        open_jobs = models.Jobs.objects.get(pk=user)
+    except:
+        open_jobs = []
+    context={
+        "title": "Profile",
+        "user":user,
+        "history": history,
+        "open_jobs":open_jobs
+    }
 
 
+@login_required(redirect_field_name='/', login_url="/login/")
+def update_profile(request, user_id):
+    user = User.objects.get(pk=user_id)
+
+def logout_view(request):
+    logout(request)
+    return redirect("/login/")
+
+def register(request):
+    if request.method == "POST":
+        form_instance = forms.RegistrationForm(request.POST)
+        if form_instance.is_valid():
+            form_instance.save()
+            return redirect("/login/")
+            # print("Hi")
+    else:
+        form_instance = forms.RegistrationForm()
+    context = {
+        "form":form_instance,
+    }
+    return render(request, "registration/register.html", context=context)
 
 
-def scoreboard(request):
-    pass
+@login_required(redirect_field_name='/', login_url='/login/')
+def submit(request, user_id):
+        print (get_client_ip(request))
+        form = perfsubmission()
+        servers = ""
+        if request.method == 'POST':
+            #print red.get('servers')
+            form = perfsubmission(request)
+            csrf = str(request.COOKIES['csrftoken'])
+            try:
+                os.chdir('/code/uploads/')
+                a="mkdir ./"+str(user_id)
+                b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+                b.wait()
+                c = b.stdout.read()
+                print (c)
+                path = "/code/uploads/"+str(user_id)+"/config.txt"
+                config = open(path, 'w+')
+                if request.FILES['FilterMain']:
+                    handle_uploaded_file(request.FILES['FilterMain'],"FilterMain.cpp",user_id)
+                try:
+                    if request.FILES['Makefile']:
+                        handle_uploaded_file(request.FILES['Makefile'],"Makefile",user_id)
+                        config.write("Makefile Y\n")
+                except:
+                    config.write("Makefile N\n")
+                try:
+                    if request.FILES['Filter_c']:
+                        handle_uploaded_file(request.FILES['Filter_c'],"Filter.cpp",user_id)
+                        config.write("Filter.cpp Y\n")
+                except:
+                    config.write("Filter.cpp N\n")
+                try:
+                    if request.FILES['Filter_h']:
+                        handle_uploaded_file(request.FILES['Filter_h'],"Filter.h",user_id)
+                        config.write("Filter.h Y\n")
+                except:
+                    config.write("Filter.h N\n")
+                try:
+                    if request.FILES['cs1300_c']:
+                        handle_uploaded_file(request.FILES['cs1300_c'],"cs1300bmp.cc",user_id)
+                        config.write("cs1300bmp.cc Y\n")
+                except:
+                    config.write("cs1300bmp.cc N\n")
+                try:
+                    if request.FILES['cs1300_h']:
+                        handle_uploaded_file(request.FILES['cs1300_h'],"cs1300bmp.h",user_id)
+                        config.write("cs1300bmp.h Y\n")
+                except:
+                    config.write("cs1300bmp.h N\n")
+                config.close()
+                return submit(request)
+            except:
+                print ("except home")
+
+        context={
+            "form": form,
+            "page_name": "Submission",
+            "servers":servers
+        }
+        return render(request, "perf.html",context=context)
+
+
+def score_update(request):
+    return JsonResponse
