@@ -26,7 +26,6 @@ from perfapp.tasks import *
 from perfapp.models import *
 
 
-from datetime import datetime
 
 
 def get_client_ip(request):
@@ -54,6 +53,10 @@ def home(request):
     score_list = []
     for u in users:
         score_list+={u.User.id: u.max_score}
+    context={
+    "page_name": "Perflab Project",
+    "u_list": score_list
+    }
     return render(request, "base.html", context=context)
 
 @login_required(redirect_field_name='/', login_url="/login/")
@@ -73,6 +76,7 @@ def profile(request, user_id):
         "history": history,
         "open_jobs":open_jobs
     }
+    return render(request, "profile.html", context=context)
 
 
 @login_required(redirect_field_name='/', login_url="/login/")
@@ -97,6 +101,9 @@ def register(request):
     }
     return render(request, "registration/register.html", context=context)
 
+@login_required(redirect_field_name='/', login_url='/login/')
+def submitted(request):
+    pass
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submit(request, user_id):
@@ -149,13 +156,13 @@ def submit(request, user_id):
                 except:
                     config.write("cs1300bmp.h N\n")
                 config.close()
-                return submit(request)
+                return submitted(request)
             except:
                 print ("except home")
 
         context={
+            "title": "Submission Form",
             "form": form,
-            "page_name": "Submission",
             "servers":servers
         }
         return render(request, "perf.html",context=context)
