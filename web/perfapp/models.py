@@ -16,7 +16,7 @@ class Servers(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     last_login =models.DateTimeField()
-    max_score = models.DoubleField()
+    max_score = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
     #django provides an automatic id field
     def __str__(self):
         return self.last_name
@@ -43,6 +43,12 @@ class Jobs(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10)
+    FilterMain = models.FileField()
+    Filter_c = models.FileField()
+    Filter_h = models.FileField()
+    Makefile = models.FileField()
+    cs1300_c = models.FileField()
+    cs1300_h = models.FileField()
 
     def __str__(self):
         return self.owner +  self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
