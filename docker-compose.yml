@@ -37,7 +37,7 @@ services:
       - redis
 
   nginx:
-    restart: always
+    restart: unless-stopped
     build: ./nginx/
     depends_on:
       - web
