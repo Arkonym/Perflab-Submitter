@@ -52,10 +52,11 @@ def home(request):
     users = User.objects.all()
     score_list = []
     for u in users:
-        score_list+={u.User.id: u.profile.max_score}
+        score_list+={"id":u.id, "score": u.profile.max_score}
     context={
     "page_name": "Perflab Project",
-    "u_list": users
+    "u_list": users,
+    "score_list": score_list
     }
     return render(request, "base.html", context=context)
 
