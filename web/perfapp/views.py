@@ -52,7 +52,10 @@ def home(request):
     users = User.objects.all()
     score_list = []
     for u in users:
-        score_list+={"id":u.id, "score": u.profile.max_score}
+        try:
+            score_list+={"id":u.id, "score": u.profile.max_score}
+        except Profile.DoesNotExist:
+            score_list+={"id": u.id}
     context={
     "page_name": "Perflab Project",
     "u_list": users,
