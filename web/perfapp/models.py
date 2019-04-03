@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 # Create your models here.
 
-class Servers(models.Model):
+class Server(models.Model):
     ip = models.CharField(max_length=100)
     hostname = models.CharField(max_length=100, default="")
     inUse = models.BooleanField(default=False)
@@ -30,7 +30,7 @@ class Profile(models.Model):
     def save_user_profile(sender, instance, **kwargs):
         instance.profile.save()
 
-class Attempts(models.Model):
+class Attempt(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now = True)
     score = models.DecimalField(max_digits=4, decimal_places=2)
@@ -39,7 +39,7 @@ class Attempts(models.Model):
         return self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(score)+ ")"
 
 
-class Jobs(models.Model):
+class Job(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10)
