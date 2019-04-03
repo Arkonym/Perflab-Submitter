@@ -55,7 +55,7 @@ def home(request):
         score_list+={u.User.id: u.profile.max_score}
     context={
     "page_name": "Perflab Project",
-    "u_list": score_list
+    "u_list": users
     }
     return render(request, "base.html", context=context)
 
