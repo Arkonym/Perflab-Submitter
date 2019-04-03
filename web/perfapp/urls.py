@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -12,4 +13,8 @@ urlpatterns = [
     path('logout/', views.logout_view),
     path('register/', views.register),
     path('scores/', views.score_update)
+]
+
+urlpatterns +=[
+    path('', RedirectView.as_view(url='/home/'))
 ]

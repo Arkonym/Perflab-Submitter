@@ -89,7 +89,7 @@ def update_profile(request, user_id):
 
 def logout_view(request):
     logout(request)
-    return redirect("/login/")
+    return redirect("/home/")
 
 def register(request):
     if request.method == "POST":
