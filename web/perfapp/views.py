@@ -49,10 +49,10 @@ def handle_upload(f, name, uid):
 # Create your views here.
 
 def home(request):
-    users = models.Profile.objects.all()
+    users = User.objects.all()
     score_list = []
     for u in users:
-        score_list+={u.User.id: u.max_score}
+        score_list+={u.User.id: u.profile.max_score}
     context={
     "page_name": "Perflab Project",
     "u_list": score_list
