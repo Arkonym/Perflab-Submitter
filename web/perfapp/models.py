@@ -15,7 +15,7 @@ class Servers(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    last_login =models.DateTimeField()
+    last_login =models.DateTimeField(auto_now_add=True, blank=True)
     max_score = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
     #django provides an automatic id field
     def __str__(self):
