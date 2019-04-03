@@ -3,8 +3,8 @@ from .models import *
 
 # Register your models here.
 
-admin.site.register(Servers)
-admin.site.register(Jobs)
-admin.site.register(Attempts)
-admin.site.register(Profile)
+admin.site.register(models.Servers)
+admin.site.register(models.Jobs)
+admin.site.register(models.Attempts)
+admin.site.register(models.Profile)
 #admin.site.regist(User)
