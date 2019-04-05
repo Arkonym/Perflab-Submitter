@@ -93,13 +93,14 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
-        form_instance = forms.RegistrationForm(request.POST)
+        form_instance = Registration(request.POST)
         if form_instance.is_valid():
-            form_instance.save()
-            return redirect("/login/")
+            if form_instance.email_validate():
+                form_instance.save()
+                return redirect("/login/")
             # print("Hi")
     else:
-        form_instance = forms.RegistrationForm()
+        form_instance = Registration()
     context = {
         "form":form_instance,
     }
