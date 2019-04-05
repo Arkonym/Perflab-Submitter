@@ -1,16 +1,31 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 	<head>
 	    <meta charset="UTF-8">
 		<title>EECE320 | {% block title %} {{title}} {% endblock %}</title>
 		{% block external %}{% endblock %}
-		<link rel="icon"
-            type="image/ico"
-            href="site_media/img/favicon.ico">
-        <link rel="stylesheet" href="site_media/css/main.css">
+		<link rel="icon" type="image/ico" href="{% static "site_media/img/favicon.ico" %}">
+    <link rel="stylesheet" href="{% static "css/main.css" %}">
 	</head>
 	<body>
 		<h1>{% block head %}{{page_title}}{% endblock %}</h1>
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <a href="/">Home</a>
+      </div>
+      <div class="top-bar-right">
+        <ul clas="menu">
+          {% if user.is_authenticated %}
+          <li><a href="/profile/">Profile</a></li>
+          <li><a href="/logout/">Logout</a></li>
+          {% else %}
+          <li><a href="/login/">Login</a><li>
+          <li><a href="/register/">Register</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
 		{% block content %}{{body}}{% endblock %}
 	</body>
 	<footer>
