@@ -6,16 +6,19 @@
   <!-- <div class="large-4 medium-4 small-12 cell"></div> -->
   <div class="large-4 medium-4 small-12 large-offset-4 medium-offset-4 cell">
     {% if form.errors %}
-    <p style="color: red;"> Please correct the error{{form.errors|pluralize}} below. </p>
+    <p style="color: red;"> Please correct the error {{form.errors|pluralize}} below. </p>
     {% endif %}
     <form action="/register/" method="post">
         {% csrf_token %}
         <h4 class="text-center">Register</h4>
         {% for field in form %}
-        <p>
-          {{field.label_tag}}<br>
-          {{field}}
-        </p>
+          <p class="text-center">
+            {{field.label_tag}}<br>
+            {{field}}
+            {% for error in field.errors %}
+            <p style="color: red"> {{error}}</p>
+            {% endfor %}
+          </p>
         {% endfor %}
         <input type="submit" class="button expanded" value="Register" />
     </form>

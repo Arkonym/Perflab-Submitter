@@ -5,30 +5,53 @@
 	    <meta charset="UTF-8">
 		<title>EECE320 | {% block title %} {{title}} {% endblock %}</title>
 		{% block external %}{% endblock %}
-		<link rel="icon" type="image/ico" href="{% static "site_media/img/favicon.ico" %}">
-    <link rel="stylesheet" href="{% static "css/main.css" %}">
+		<link rel="icon" type="image/ico" href="{% static "/img/favicon.ico" %}">
+    <link rel="stylesheet" href="{% static "css/foundation.css" %}">
+    <link rel="stylesheet" href="{% static "css/app.css" %}">
 	</head>
 	<body>
 		<h1>{% block head %}{{page_title}}{% endblock %}</h1>
-    <div class="top-bar">
-      <div class="top-bar-left">
-        <a href="/">Home</a>
-      </div>
-      <div class="top-bar-right">
-        <ul clas="menu">
-          {% if user.is_authenticated %}
-          <li><a href="/profile/">Profile</a></li>
-          <li><a href="/logout/">Logout</a></li>
-          {% else %}
-          <li><a href="/login/">Login</a><li>
-          <li><a href="/register/">Register</a></li>
-          {% endif %}
-        </ul>
+    <div class="sticky">
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <ul class="dropdown menu" data-dropdown-menu>
+            {% if user.is_authenticated %}
+            <li class="menu-text">Welcome, {{ user }}</li>
+            {% endif %}
+            <li><a href="/">Home</a>
+              <ul class="menu vertical">
+                <li><a href="https://www.bryancdixon.com/">Bryan's Site</a></li>
+                <li><a href="https://github.com/CSUChico-CSCI221/CSCI221-PerfLab">Project Github Repo</a></li>
+              </ul>
+            </li>
+          </ul>
+
+        </div>
+        <div class="top-bar-right">
+          <ul class="menu">
+            {% if user.is_authenticated %}
+              {% if user.is_superuser %}
+              <li><a href="/admin/">Administration</a></li>
+              {% endif %}
+              <li><a href="/profile/{{user.id}}">Profile</a></li>
+              <li><a href="/logout/">Logout</a></li>
+              {% else %}
+              <li><a href="/login/">Login</a><li>
+                <li><a href="/register/">Register</a></li>
+                {% endif %}
+          </ul>
+        </div>
       </div>
     </div>
+    <footer>
+      <div class="wrap row small-up-1 medium-up-3">
+        <div class="column"></div>
+      </div>
+    </footer>
 		{% block content %}{{body}}{% endblock %}
+    <script src="{% static "js/vendor/jquery.js" %}"></script>
+    <script src="{% static "js/vendor/what-input.js" %}"></script>
+    <script src="{% static "js/vendor/foundation.min.js" %}"></script>
+    <script src="{% static "js/app.js" %}"></script>
 	</body>
-	<footer>
-<!-- 	<a href="" target="_blank">Leave Feedback</a> -->
-	</footer>
-</html>
+  </html>
