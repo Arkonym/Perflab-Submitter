@@ -19,11 +19,13 @@ red = Redis(host='redis', port=6379)
 #from perfapp.dhcp import *
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from datetime import datetime
 
 from perfapp.forms import *
 from perfapp.tasks import *
 from perfapp.models import *
+from perfapp.tables import ScoreTable
 
 
 
@@ -49,19 +51,17 @@ def handle_upload(f, name, uid):
 # Create your views here.
 
 def home(request):
-    users = User.objects.all()
-    score_list = []
-    for u in users:
-        try:
-            score_list+={"id":u.id, "score": u.profile.max_score}
-        except Profile.DoesNotExist:
-            score_list+={"id": u.id}
+    users = ScoreTable(User.objects.all(), 'profile.max_score')
+    try:
+        jobs = models.Job.objects.get(pk=request.user)
+    except:
+        jobs=None
     context={
     "page_name": "Perflab Project",
     "u_list": users,
-    "score_list": score_list
+    "job_list": jobs
     }
-    return render(request, "base.html", context=context)
+    return render(request, "home.html", context=context)
 
 @login_required(redirect_field_name='/', login_url="/login/")
 def profile(request, user_id):
@@ -95,9 +95,8 @@ def register(request):
     if request.method == "POST":
         form_instance = Registration(request.POST)
         if form_instance.is_valid():
-            if form_instance.email_validate():
-                form_instance.save()
-                return redirect("/login/")
+            form_instance.save()
+            return redirect("/login/")
             # print("Hi")
     else:
         form_instance = Registration()
