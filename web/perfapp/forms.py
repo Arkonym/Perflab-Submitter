@@ -12,22 +12,21 @@ class perfsubmission(forms.Form):
     cs1300_h = forms.FileField(label='cs1300bmp.h',required=False)
 
 class Registration(UserCreationForm):
-
     class Meta:
         model=User
         fields=("username", "first_name", "last_name", "email", "password1", "password2")
 
-    def email_validate(self):
-        email = self.cleaned_data["email"]
-        domain = data.split('@')[1]
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        domain = email.split('@')[1]
         accepted_domains = ["mail.csuchico.edu", "csuchico.edu"]
         if domain not in accepted_domains:
             raise forms.ValidationError("Email must be a valid CSU Chico address")
-        return data
+        return email
 
     def save(self, commit=True):
-        user = super(RegistrationForm, self).save(commit=False)
-        user.email = self.cleaned_data["email"]
+        user = super(Registration, self).save(commit=False)
+        user.email = self.cleaned_data['email']
         if commit:
             user.save()
         return user
