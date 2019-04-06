@@ -17,9 +17,10 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     last_login =models.DateTimeField(auto_now_add=True, blank=True)
     max_score = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
+    max_score_date = models.DateTimeField(null=True, blank=True)
     #django provides an automatic id field
     def __str__(self):
-        return self.last_name
+        return self.user.username
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -54,3 +55,11 @@ class Job(models.Model):
         return self.owner +  self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
     # class Meta:
     #     ordering= ["owner","time_stamp"]
+
+# class Upload(models.Model):
+#     FilterMain = models.FileField()
+#     Filter_c = models.FileField()
+#     Filter_h = models.FileField()
+#     Makefile = models.FileField()
+#     cs1300_c = models.FileField()
+#     cs1300_h = models.FileField()
