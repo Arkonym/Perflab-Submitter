@@ -44,8 +44,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-#     volumes:
-#        - ./code/static:/static
+    volumes:
+      - ./web/perfapp/static/:/static       
     links:
       - web:web
 
