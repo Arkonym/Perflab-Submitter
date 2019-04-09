@@ -3,92 +3,38 @@
 {% block external %}
 {% endblock %}
 {% block head %}
-Perflab RPi2 Runner
 {% endblock %}
 {% block content %}
-<h3>Performance Lab:</h3>
-
-<br>
+&nbsp
+<div class="grid-container fluid">
+  <div class="grid-x grid-padding-x">
+    <h3 class="align-left">&nbsp New Submission:</h3>
+  </div>
+  <div class="grid-x grid-padding-x">
+    <div class="cell small-6">
+    <p>&nbsp All files except for Filtermain will be provided if not submitted.<br>
+      &nbsp It is not neccessary to submit other files unless you have modified them.</p>
+    </div>
+  </div>
 {{ servers }}
-
-{% if form.errors %}
+  <div class="grid-x">
+    {% if form.errors %}
     <p style="color: red;">
         Please correct the error{{ form.errors|pluralize }} below.
     </p>
-{% endif %}
-<form action="" method="post" enctype="multipart/form-data">
-	{% csrf_token %}
-	<table>
-
-	    <tr>
-            <th align="left">
-                <label for="FilterMain">(REQUIRED) FilterMain.cpp: </label>
-            </th>
-            <th>
-                {{ form.FilterMain }}
-            </th>
-            <th align="left">
-                {{ form.FilterMain.errors }}
-            </th>
-	    </tr>
-	    <tr>
-            <th align="left">
-
-                <label for="Makefile">Makefile: </label>
-            </th>
-            <th>
-                {{ form.Makefile }}
-            </th>
-            <th align="left">
-                 {{ form.Makefile.errors }}
-            </th>
-        </tr>
-        <tr>
-            <th align="left">
-                <label for="Filter.c">Filter.cpp: </label>
-            </th>
-            <th>
-                {{ form.Filter_c }}
-            </th>
-            <th align="left">
-                 {{ form.Filter_c.errors }}
-            </th>
-        </tr>
-        <tr>
-            <th align="left">
-                <label for="Filter_h">Filter.h: </label>
-            </th>
-            <th>
-                {{ form.Filter_h }}
-            </th>
-            <th align="left">
-                 {{ form.Filter_h.errors }}
-            </th>
-        </tr>
-        <tr>
-            <th align="left">
-
-                <label for="cs1300_c">cs1300bmp.cc: </label>
-            </th>
-            <th>
-                {{ form.cs1300_c }}
-            </th>
-            <th align="left">
-                {{ form.cs1300_c.errors }}
-            </th>
-        </tr>
-         <tr>
-            <th align="left">
-                <label for="cs1300_h">cs1300bmp.h: </label>
-            </th>
-            <th>
-                {{ form.cs1300_h }}
-            </th>
-            <th align="left">
-                 {{ form.cs1300_h.errors }}
-            </th>
-        </tr>
-	</table>
-     <p><input type="submit" value="Submit Code Files" /></p>
-</form>
+    {% endif %}
+  </div>
+  <div class="grid-x grid-padding-x">
+    <div class="cell small-12">
+      <form action="" method="post" enctype="multipart/form-data">
+	       {% csrf_token %}
+         <table>
+         {{form.as_table}}
+         </table
+         <div class=>
+         <input type="submit" class="button" value="Submit"/>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
