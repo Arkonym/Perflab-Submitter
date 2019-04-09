@@ -4,12 +4,13 @@ from django.contrib.auth.models import User
 
 class perfsubmission(forms.Form):
     #username = forms.CharField(max_length=50)
-    FilterMain = forms.FileField(label='FilterMain.cpp', required=True)
+    FilterMain = forms.FileField(label='FilterMain.cpp (Required)', required=True)
     Filter_c = forms.FileField(label='Filter.cpp',required=False)
     Filter_h = forms.FileField(label='Filter.h',required=False)
     Makefile = forms.FileField(label='Makefile',required=False)
     cs1300_c = forms.FileField(label='cs1300bmp.cpp',required=False)
     cs1300_h = forms.FileField(label='cs1300bmp.h',required=False)
+    required_css_class = 'required'
 
 class Registration(UserCreationForm):
     class Meta:
@@ -21,7 +22,7 @@ class Registration(UserCreationForm):
         domain = email.split('@')[1]
         accepted_domains = ["mail.csuchico.edu", "csuchico.edu"]
         if domain not in accepted_domains:
-            raise forms.ValidationError("Email must be a valid CSU Chico address")
+            raise forms.ValidationError("Email must be a valid CSU Chico email address")
         return email
 
     def save(self, commit=True):
