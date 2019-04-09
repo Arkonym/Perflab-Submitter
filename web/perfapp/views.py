@@ -25,7 +25,7 @@ from datetime import datetime
 from perfapp.forms import *
 from perfapp.tasks import *
 from perfapp.models import *
-from perfapp.tables import ScoreTable
+from perfapp.tables import ScoreTable, HistoryTable, JobTable
 
 
 
@@ -38,8 +38,8 @@ def get_client_ip(request):
 		ip = request.META.get('REMOTE_ADDR')
 	return ip
 
-def handle_upload(f, name, uid):
-    path = "/code/uploads/"+str(uid)+"/"+name
+def handle_upload(f, f_name, j_path):
+    path = j_path +"/"+f_name
     dest = open(path, 'w+')
     if f.multiple_chunks:
         for c in f.chunks():
@@ -53,7 +53,7 @@ def handle_upload(f, name, uid):
 def home(request):
     users = ScoreTable(User.objects.all(), 'profile.max_score')
     try:
-        jobs = models.Job.objects.get(pk=request.user)
+        jobs = JobTable(models.Job.objects.get(pk=request.user))
     except:
         jobs=None
     context={
@@ -67,11 +67,11 @@ def home(request):
 def profile(request, user_id):
     user = User.objects.get(pk=user_id)
     try:
-        history = models.Attempts.objects.get(pk=user)
+        history = HistoryTable(models.Attempts.objects.get(pk=user))
     except:
         history = []
     try:
-        open_jobs = models.Jobs.objects.get(pk=user)
+        open_jobs = JobTable(models.Jobs.objects.get(pk=user))
     except:
         open_jobs = []
     context={
@@ -125,37 +125,40 @@ def submit(request, user_id):
                 b.wait()
                 c = b.stdout.read()
                 print (c)
-                path = "/code/uploads/"+str(user_id)+"/config.txt"
-                config = open(path, 'w+')
+                id = models.Job.objects.get(pk=user_id).last().id + 1
+                print(id)
+                path = "/code/uploads/"+str(user_id)+"/"+str(id)
+                con_path = path +"/config.txt"
+                config = open(con_path, 'w+')
                 if request.FILES['FilterMain']:
-                    handle_uploaded_file(request.FILES['FilterMain'],"FilterMain.cpp",user_id)
+                    handle_uploaded_file(request.FILES['FilterMain'],"FilterMain.cpp",path)
                 try:
                     if request.FILES['Makefile']:
-                        handle_uploaded_file(request.FILES['Makefile'],"Makefile",user_id)
+                        handle_uploaded_file(request.FILES['Makefile'],"Makefile", path)
                         config.write("Makefile Y\n")
                 except:
                     config.write("Makefile N\n")
                 try:
                     if request.FILES['Filter_c']:
-                        handle_uploaded_file(request.FILES['Filter_c'],"Filter.cpp",user_id)
+                        handle_uploaded_file(request.FILES['Filter_c'],"Filter.cpp", path)
                         config.write("Filter.cpp Y\n")
                 except:
                     config.write("Filter.cpp N\n")
                 try:
                     if request.FILES['Filter_h']:
-                        handle_uploaded_file(request.FILES['Filter_h'],"Filter.h",user_id)
+                        handle_uploaded_file(request.FILES['Filter_h'],"Filter.h", path)
                         config.write("Filter.h Y\n")
                 except:
                     config.write("Filter.h N\n")
                 try:
                     if request.FILES['cs1300_c']:
-                        handle_uploaded_file(request.FILES['cs1300_c'],"cs1300bmp.cc",user_id)
+                        handle_uploaded_file(request.FILES['cs1300_c'],"cs1300bmp.cc", path)
                         config.write("cs1300bmp.cc Y\n")
                 except:
                     config.write("cs1300bmp.cc N\n")
                 try:
                     if request.FILES['cs1300_h']:
-                        handle_uploaded_file(request.FILES['cs1300_h'],"cs1300bmp.h",user_id)
+                        handle_uploaded_file(request.FILES['cs1300_h'],"cs1300bmp.h", path)
                         config.write("cs1300bmp.h Y\n")
                 except:
                     config.write("cs1300bmp.h N\n")
