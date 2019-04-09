@@ -1,1 +1,4 @@
 footer { background-color:red; margin-top:100px}
+.column, .columns{
+  min-height: 1px;
+}
