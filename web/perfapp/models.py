@@ -42,8 +42,10 @@ class Attempt(models.Model):
 
 class Job(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    task_id= models.SmallIntegerField(blank=True, default=-1)
     time_stamp = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10)
+    percent_complete = models.SmallIntegerField(blank=True, default=0)
     FilterMain = models.FileField()
     Filter_c = models.FileField()
     Filter_h = models.FileField()

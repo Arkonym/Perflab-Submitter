@@ -6,13 +6,45 @@
 {% block content %}
 <div class="grid-container fluid">
   <div class="grid-x">
-    <div class="cell">
       <table>
+        <thead>
+          <tr>
+            <th>Attempt #</th>
+            <th>Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
           {% for entry in history %}
           <tr>
-
-            </tr>
+            <td>{{entry.id}}</td>
+            <td>{{entry.score}}</td>
+            <td>{{entry.time_stamp}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
       </table>
-      </div>
+  </div>
+  <div class="grid-x">
+      <table>
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Status</th>
+            <th>Time started</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in jobs %}
+          <tr>
+            <td>{{entry.id}}</td>
+            <td>{{entry.status}}</td>
+            <td>{{entry.time_stamp}}</td>
+            {# progress bar for task# %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
 </div>
 {% endblock %}
