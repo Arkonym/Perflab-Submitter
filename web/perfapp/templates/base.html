@@ -33,7 +33,7 @@
               {% if user.is_superuser %}
               <li><a href="/admin/">Administration</a></li>
               {% endif %}
-              <li><a href="/profile/{{user.id}}">Profile</a></li>
+              <li><a href="/profile/">Profile</a></li>
               <li><a href="/logout/">Logout</a></li>
               {% else %}
               <li><a href="/login/">Login</a><li>
@@ -43,15 +43,12 @@
         </div>
       </div>
     </div>
-    <footer>
-      <div class="wrap row small-up-1 medium-up-3">
-        <div class="column"></div>
-      </div>
-    </footer>
-		{% block content %}{{body}}{% endblock %}
+    {% block content %}{{body}}{% endblock %}
+
     <script src="{% static "js/vendor/jquery.js" %}"></script>
     <script src="{% static "js/vendor/what-input.js" %}"></script>
     <script src="{% static "js/vendor/foundation.min.js" %}"></script>
     <script src="{% static "js/app.js" %}"></script>
+    <script src="{% static "js/clickthru.js" %}"></script>
 	</body>
   </html>

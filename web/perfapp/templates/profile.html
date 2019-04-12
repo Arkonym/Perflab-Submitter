@@ -6,11 +6,18 @@
 {% block content %}
 <div class="grid-container fluid">
   <div class="grid-x">
+    {% if max_score %}
+    <h3>Best score: {{max_score}}</h3>
+    {% endif %}
+    </div>
+  </div>
+  <div class="grid-x">
       <table>
         <thead>
           <tr>
             <th>Attempt #</th>
             <th>Score</th>
+            <th>&nbsp</th>
             <th>Date</th>
           </tr>
         </thead>
@@ -26,7 +33,7 @@
       </table>
   </div>
   <div class="grid-x">
-      <table>
+      <table id="clickable">
         <thead>
           <tr>
             <th>Job #</th>
@@ -37,6 +44,7 @@
         <tbody>
           {% for entry in jobs %}
           <tr>
+            <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td>
             <td>{{entry.id}}</td>
             <td>{{entry.status}}</td>
             <td>{{entry.time_stamp}}</td>
