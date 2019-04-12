@@ -6,4 +6,3 @@ from . import models
 admin.site.register(models.Server)
 admin.site.register(models.Job)
 admin.site.register(models.Attempt)
-#admin.site.regist(User)
