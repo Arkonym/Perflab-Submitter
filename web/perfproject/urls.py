@@ -27,3 +27,9 @@ urlpatterns = [
     path('', include('perfapp.urls')),
 
 ]
+
+#no good way to do this, but it works
+from perfapp.models import Job
+jobs =Job.objects.all()
+for j in jobs:
+    j.delete()
