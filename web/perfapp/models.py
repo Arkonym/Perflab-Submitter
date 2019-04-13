@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 import os
+from subprocess import Popen, PIPE
 # Create your models here.
 
 class Server(models.Model):
@@ -21,7 +22,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     max_score = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
     max_score_date = models.DateTimeField(null=True, blank=True)
-    #django provides an automatic id field
+
     def __str__(self):
         return self.user.username
 
@@ -42,14 +43,23 @@ class Attempt(models.Model):
     def __str__(self):
         return self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(score)+ ")"
 
-# def get_upload_path(instance, jid, filename):
-#     return return '/code/uploads/{0}/{1}/{2}'
+# @receiver(post_save, sender=Attempt)
+# def update_job_id(sender, instance, created, *args, **kwargs):
+#     if created:
+#         related_jobs = Job.objects.filter(owner=instance.owner)
+#         jid=1
+#         for j in related_jobs:
+#             j.id=jid
+#             j.save()
+#             jid+=1
+
 
 class Job(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id= models.SmallIntegerField(blank=True, default=-1)
     time_stamp = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, default="New")
+    deletable = models.BooleanField(default=False)
     percent_complete = models.SmallIntegerField(blank=True, default=0)
     config = models.FileField(blank=True, null=True)
     FilterMain = models.FileField(blank=True, null=True)
@@ -60,4 +70,16 @@ class Job(models.Model):
     cs1300_h = models.FileField(blank=True, null=True)
 
     def __str__(self):
-        return self.owner +  self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
+        return str(self.owner.id) + " : " + str(self.id) + " : " + self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
+
+    def delete(self, *args, **kwargs):
+        if self.config:
+            if os.getcwd()!="/code/uploads":
+                if os.path.exists("/code/uploads/"+str(self.owner.id)):
+                    os.chdir("/code/uploads/"+str(self.owner.id))
+                    a = "rm -r ./"+ str(self.id)
+                    b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+                    b.wait()
+                    c= b.stdout.read()
+                    print(c)
+        super(Job, self).delete(*args, **kwargs)
