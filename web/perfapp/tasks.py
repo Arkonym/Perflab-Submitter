@@ -13,10 +13,15 @@ red = Redis(host='redis', port=6379)
 
 @shared_task
 def cleanup():
-    all_jobs= Job.objects.all()
-    for j in all_jobs:
-        if j.status=='STOPPED':
-            j.delete()
+    try:
+        stopped = Job.objects.filter(deletable=True)
+    except Job.DoesNotExist:
+            return "empty jobs"
+    for j in stopped:
+        print(str(j.owner) + " : " +str(j))
+        j.delete()
+    stopped.delete()
+    return "cleanup complete"
 
 @shared_task
 def runLab(jid,uid,server,hostname):
