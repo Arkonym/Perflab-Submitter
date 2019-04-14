@@ -230,13 +230,13 @@ def submit(request):
         }
         return render(request, "perf.html",context=context)
 
-def progress(request, j_id):
+def progress(request, t_id):
     try:
-        job = Job.objects.get(owner=request.user, jid=j_id)
+        job = Job.objects.get(owner=request.user, id=t_id)
     except Job.DoesNotExist:
         job=None
     context={
-        "title": "Open Job #"+str(jid),
+        "title": "Open Job #"+str(t_id),
         "job" : job
     }
     return render(request, "progress.html", context=context)

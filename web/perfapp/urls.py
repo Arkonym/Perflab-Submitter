@@ -12,7 +12,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view()),
     path('logout/', views.logout_view),
     path('register/', views.register),
-    path('runlab/<int:j_id>', views.progress, name='Progress'),
+    path('runlab/<int:t_id>', views.progress, name='Progress'),
     path('<int:j_id>/stop/', views.stop_job, name='Stop')
 ]
 
