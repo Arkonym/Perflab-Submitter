@@ -28,7 +28,7 @@ SECRET_KEY = 'rns6!$0sgc_6_*yeik0eua$ilhm@a#ahnm7&an!y4bnnv7ih+p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["csciperfproject.csuchico.edu"]
+ALLOWED_HOSTS = ["0.0.0.0"]
 
 
 # Application definition
@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'perfapp',
     'django_tables2',
+    'celery_progress',
+    #'django_celery_beat',
 
 ]
 
@@ -131,9 +133,9 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 #If we want a periodically scheduled task
 CELERY_BEAT_SCHEDULE = {
-    'hello': {
-        'task': 'perfapp.tasks.hello',
-        'schedule': crontab()  # execute every minute
+    'cleanup': {
+        'task': 'perfapp.tasks.cleanup',
+        'schedule': crontab(minute='*/5')  # execute every minute
     }
 }
 
