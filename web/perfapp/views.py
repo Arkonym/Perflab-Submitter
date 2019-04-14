@@ -244,6 +244,7 @@ def progress(request, j_id):
 def stop_job(request, j_id):
     job = Job.objects.get(owner=request.user, jid=j_id)
     job.status='Stopped'
+    job.deletable=True
     revoke(job.task_id)
     job.save()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
