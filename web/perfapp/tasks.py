@@ -1,4 +1,6 @@
-from celery import shared_task
+from __future__ import absolute_import
+from celery import shared_task, task
+from celery.utils.log import get_task_logger
 from celery_progress.backend import ProgressRecorder
 from perfapp.models import Job
 
@@ -9,18 +11,19 @@ from subprocess import Popen, PIPE
 from redis import Redis
 red = Redis(host='redis', port=6379)
 
-
+logger=get_task_logger(__name__)
 
 @shared_task
 def cleanup():
     try:
-        stopped = Job.objects.filter(deletable=True)
+        jobs = Job.objects.all()
+        print(jobs)
     except Job.DoesNotExist:
-            return "empty jobs"
-    for j in stopped:
-        print(str(j.owner) + " : " +str(j))
-        j.delete()
-    stopped.delete()
+        return "empty jobs"
+    for j in jobs:
+        if j.deletable==True:
+            print(str(j.owner) + " : " +str(j))
+            j.delete()
     return "cleanup complete"
 
 @shared_task
