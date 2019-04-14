@@ -3,21 +3,21 @@ version: '3'
 services:
   redis:
     image: "redis:alpine"
-    
+
   web:
     build: ./web
     command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     links:
       - redis
     volumes:
-      - ./web/:/code/
+      - ./web/:/perfserv/code/
     expose:
       - "8000"
     depends_on:
       - redis
-      
+
   celery:
-    build: 
+    build:
       context: ./web
       dockerfile: CeleryDockerfile
     command: celery -A perfproject worker -l info
@@ -25,9 +25,9 @@ services:
       - redis
     depends_on:
       - redis
-      
+
   celery-beat:
-    build: 
+    build:
       context: ./web
       dockerfile: CeleryDockerfile
     command: celery -A perfproject beat -l info
@@ -45,7 +45,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./web/perfapp/static/:/static       
+      - ./web/perfapp/static/:/static
     links:
       - web:web
-
