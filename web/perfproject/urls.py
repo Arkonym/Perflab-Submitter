@@ -25,6 +25,7 @@ from perfapp import views as perfapp
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('perfapp.urls')),
+    path('/celery_progress/', include('celery_progress.urls')),
 
 ]
 
