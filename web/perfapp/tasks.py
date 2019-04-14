@@ -31,7 +31,10 @@ def dummyTask(j_id, uid):
     print(j_id)
     print(uid)
     user = User.objects.get(id=uid)
-    job = Job.objects.get(owner=user, jid=j_id)
+    try:
+        job = Job.objects.get(owner=user, jid=j_id)
+    except Job.DoesNotExist:
+        return 'no matching job'
     job.status='RUNNING'
     job.save()
     progress_recorder = ProgressRecorder(self)
@@ -42,8 +45,10 @@ def dummyTask(j_id, uid):
         job.save()
     job.status='COMPLETE'
     newAttempt = Attempt(owner=user, note_field=job.note_field, score=79.99, time_stamp=job.time_stamp)
+    newAttempt.save()
     job.deletable=True
     job.save()
+    return 'task complete'
 
 @shared_task(bind=True)
 def runLab(j_id,uid,server,hostname):
@@ -234,4 +239,6 @@ def runLab(j_id,uid,server,hostname):
         toReturn +="\nResulting score is " + str(score) + "\n"
     except:
         toReturn = "Unexpected error: " + str(sys.exc_info())
+    newAttempt = Attempt(owner=user, note_field=job.note_field, score=79.99, time_stamp=job.time_stamp)
+    newAttempt.save()
     return toReturn
