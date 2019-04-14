@@ -28,7 +28,7 @@ SECRET_KEY = 'rns6!$0sgc_6_*yeik0eua$ilhm@a#ahnm7&an!y4bnnv7ih+p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["0.0.0.0"]
+ALLOWED_HOSTS = ["csciperfproject.csuchico.edu"]
 
 
 # Application definition
@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'perfapp',
     'django_tables2',
-    'celery_progress',
-    #'django_celery_beat',
 
 ]
 
@@ -145,3 +143,4 @@ LOGIN_REDIRECT_URL='/home/'
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT='/static'
