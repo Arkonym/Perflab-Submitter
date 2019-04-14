@@ -10,6 +10,7 @@ class perfsubmission(forms.Form):
     Makefile = forms.FileField(label='Makefile',required=False)
     cs1300_c = forms.FileField(label='cs1300bmp.cpp',required=False)
     cs1300_h = forms.FileField(label='cs1300bmp.h',required=False)
+    Note = forms.CharField(label='Note (Optional)', required=False)
     required_css_class = 'required'
 
 class Registration(UserCreationForm):
