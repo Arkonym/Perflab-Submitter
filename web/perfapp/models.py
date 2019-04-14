@@ -58,7 +58,7 @@ class Attempt(models.Model):
 class Job(models.Model):
     jid = models.PositiveSmallIntegerField(blank=True, default=0) ##independent of primary key id
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    task_id= models.SmallIntegerField(blank=True, default=-1)
+    task_id= models.CharField(max_length=40, blank=True, null=True, default="")
     time_stamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
