@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}
+{{title}}
+{% endblock %}
+
+{% block content %}
+  <div class="grid-container fluid">
+    <div class="grid-x">
+      <div class="cell small-6 medium-10">&nbsp</div>
+      <div class="cell small-6 medium-10">
+        {% if job %}
+        <center>
+        <h3>Job # {{job.id}}</h3>
+        <h3>Status {{job.status}}</h3>
+        <h3>Progress {{job.percent_complete}}</h3>
+        </center>
+        </div>
+        {% else %}
+        <center>
+          <h3>Job not found.</h3>
+          </center>
+        {% endif %}
+      <div class="cell small-6 medium-10">&nbsp</div>
+      </div>
+    </div>
+{% endblock %}
