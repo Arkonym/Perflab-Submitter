@@ -1,24 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 {% block head %}
 <title> Profile</title>
 {% endblock %}
 
 {% block content %}
+&nbsp;
 <div class="grid-container fluid">
   <div class="grid-x">
     {% if max_score %}
     <h3>Best score: {{max_score}}</h3>
     {% endif %}
     </div>
-  </div>
-  <div class="grid-x">
+  <div class="grid-x grid-padding-x align-center">
+    <div class="cell medium-8">
       <table>
         <thead>
           <tr>
             <th style="display:none"></th>
             <th>Attempt #</th>
             <th>Score</th>
-            <th>&nbsp</th>
+            <th>&nbsp;</th>
             <th>Date</th>
           </tr>
         </thead>
@@ -32,28 +34,50 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
   </div>
-  <div class="grid-x">
+  <div class="grid-x grid-padding-x align-center">
+    <div class="cell medium-8">
       <table id="clickable">
         <thead>
           <tr>
             <th>Job #</th>
             <th>Status</th>
             <th>Time started</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
           </tr>
         </thead>
         <tbody>
-          {% for entry in jobs %}
+          {% for entry in open_jobs %}
           <tr>
             <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td>
-            <td>{{entry.id}}</td>
+            <td>{{entry.jid}}</td>
             <td>{{entry.status}}</td>
             <td>{{entry.time_stamp}}</td>
-            {# progress bar for task# %}
+            <td>
+              <script>
+                var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
+                $(function(){
+                  CeleryProgressBar.initProgressBar(progressUrl)
+                });
+              </script>
+              <div class="progress-wrapper">
+                <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;"</div></div>
+              <div class="progress-bar-message">{{entry.percent_complete}}%</div>
+            </td>
+            <td>
+              <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
+                {% csrf_token %}
+                <input type="Submit" class="button alert" value="Stop" />
+              </form>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
   </div>
 </div>
 {% endblock %}
+<script src="{% static "js/celery_progress/celery_progress.js" %}"></script>
