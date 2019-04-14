@@ -16,4 +16,3 @@ RUN chown celery:celery -R /home/celery
 WORKDIR /home/celery
 USER celery
 RUN chmod 400 /home/celery/.ssh/id_rsa
-
