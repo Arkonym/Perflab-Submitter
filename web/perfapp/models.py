@@ -37,8 +37,9 @@ class Profile(models.Model):
 
 class Attempt(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    time_stamp = models.DateTimeField(auto_now = True)
+    time_stamp = models.DateTimeField()
     score = models.DecimalField(max_digits=4, decimal_places=2)
+    note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
     def __str__(self):
         return self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(score)+ ")"
@@ -55,9 +56,10 @@ class Attempt(models.Model):
 
 
 class Job(models.Model):
+    jid = models.PositiveSmallIntegerField(blank=True, default=0) ##independent of primary key id
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id= models.SmallIntegerField(blank=True, default=-1)
-    time_stamp = models.DateTimeField(auto_now=True)
+    time_stamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
     percent_complete = models.SmallIntegerField(blank=True, default=0)
@@ -68,16 +70,18 @@ class Job(models.Model):
     Makefile = models.FileField(blank=True, null=True)
     cs1300_c = models.FileField(blank=True, null=True)
     cs1300_h = models.FileField(blank=True, null=True)
+    note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
     def __str__(self):
-        return str(self.owner.id) + " : " + str(self.id) + " : " + self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
+        return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
 
     def delete(self, *args, **kwargs):
         if self.config:
-            if os.getcwd()!="/code/uploads":
-                if os.path.exists("/code/uploads/"+str(self.owner.id)):
-                    os.chdir("/code/uploads/"+str(self.owner.id))
-                    a = "rm -r ./"+ str(self.id)
+            if os.getcwd()!="/perfserv/uploads":
+                os.chdir("/perfserv/uploads")
+                if os.path.exists("./"+str(self.owner.id)):
+                    os.chdir("./"+str(self.owner.id))
+                    a = "rm -r ./"+ str(self.jid)
                     b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                     b.wait()
                     c= b.stdout.read()
