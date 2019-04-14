@@ -2,7 +2,8 @@ from __future__ import absolute_import
 from celery import shared_task, task
 from celery.utils.log import get_task_logger
 from celery_progress.backend import ProgressRecorder
-from perfapp.models import Job
+from perfapp.models import Job, Attempt
+from django.contrib.auth.models import User
 
 from time import sleep
 import sys, os, subprocess
@@ -25,26 +26,50 @@ def cleanup():
             print(str(j.owner) + " : " +str(j))
             j.delete()
     return "cleanup complete"
+@shared_task()
+def dummyTask(j_id, uid):
+    print(j_id)
+    print(uid)
+    user = User.objects.get(id=uid)
+    job = Job.objects.get(owner=user, jid=j_id)
+    job.status='RUNNING'
+    job.save()
+    progress_recorder = ProgressRecorder(self)
+    for i in range(100):
+        sleep(1)
+        progress_recorder.set_progress(i+1, 100)
+        job.percent_complete=i+1
+        job.save()
+    job.status='COMPLETE'
+    newAttempt = Attempt(owner=user, note_field=job.note_field, score=79.99, time_stamp=job.time_stamp)
+    job.deletable=True
+    job.save()
 
-@shared_task
-def runLab(jid,uid,server,hostname):
-    current_task.update_state(state='PROGRESS', meta={'current': 0, 'total': 100})
+@shared_task(bind=True)
+def runLab(j_id,uid,server,hostname):
+    owner = User.objects.get(id=uid)
+    job = Job.objects.get(owner=user, jid=j_id)
+    progress_recorder = ProgressRecorder(self)
+    #current_task.update_state(state='PROGRESS', meta={'current': 0, 'total': 100})
     toReturn = ""
     try:
-        path = "/code/uploads/"+str(csrf).rstrip().lstrip()+"/"
+        path = "/perfserv/uploads/"+str(uid)+"/"+str(j_id)
         #print path
         config = open(path + "config.txt","r")
-        current_task.update_state(state='PROGRESS', meta={'current': 1, 'total': 100})
+        progress_recorder.set_progress(1, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 1, 'total': 100})
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"rm -rf perflab-setup\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         b.wait()
         c = b.stdout.read()
-        current_task.update_state(state='PROGRESS', meta={'current': 2, 'total': 100})
+        progress_recorder.set_progress(2, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 2, 'total': 100})
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cp -rf perflab-files perflab-setup\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         b.wait()
         c = b.stdout.read()
-        current_task.update_state(state='PROGRESS', meta={'current': 3, 'total': 100})
+        progress_recorder.set_progress(3, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 3, 'total': 100})
         f = open(path+"FilterMain.cpp","r")
         for line in f:
             if "unistd" in line:
@@ -53,7 +78,8 @@ def runLab(jid,uid,server,hostname):
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         b.wait()
         c = b.stdout.read()
-        current_task.update_state(state='PROGRESS', meta={'current': 4, 'total': 100})
+        progress_recorder.set_progress(4, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 4, 'total': 100})
         for line in config:
         	#print line
             line = line.split()
@@ -68,7 +94,8 @@ def runLab(jid,uid,server,hostname):
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read()
-        current_task.update_state(state='PROGRESS', meta={'current': 5, 'total': 100})
+        progress_recorder.set_progress(5, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 5, 'total': 100})
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; make filter\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         b.wait()
@@ -81,7 +108,8 @@ def runLab(jid,uid,server,hostname):
             if not "ECDSA" in e:
                 return e
         #print c
-        current_task.update_state(state='PROGRESS', meta={'current': 10, 'total': 100})
+        progress_recorder.set_progress(10, 100)
+        #current_task.update_state(state='PROGRESS', meta={'current': 10, 'total': 100})
         status = 10.0
         tests = 5
         increment = (100.0-status)/(4.0*float(tests))
@@ -105,7 +133,8 @@ def runLab(jid,uid,server,hostname):
                     gauss = gauss + [score]
                     status = status + increment
                     count = count + 1
-                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                    progress_recorder.set_progress(status, 100)
+                    #current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
             except:
                 return "gauss " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read())
 
@@ -125,7 +154,7 @@ def runLab(jid,uid,server,hostname):
                     avg = avg + [score]
                     status = status + increment
                     count = count + 1
-                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                    #current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
             except:
                 return "avg " + str(sys.exc_info())+ " " + hostname
 
@@ -145,7 +174,7 @@ def runLab(jid,uid,server,hostname):
                     hline = hline + [score]
                     status = status + increment
                     count = count + 1
-                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                    #current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
             except:
                 return "hline " + str(sys.exc_info()) + " " + hostname
 
@@ -167,7 +196,7 @@ def runLab(jid,uid,server,hostname):
                     emboss = emboss + [score]
                     status = status + increment
                     count = count + 1
-                    current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
+                    #current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
             except:
                 #print e
                 return  "emboss " + str(sys.exc_info()) + " " + hostname
