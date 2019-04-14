@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tz %}
 {% block head %}
 <title> Profile</title>
 {% endblock %}
@@ -54,7 +55,9 @@
             <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td>
             <td>{{entry.jid}}</td>
             <td>{{entry.status}}</td>
+            {% localtime on  %}
             <td>{{entry.time_stamp}}</td>
+            {% endlocaltime %}
             <td>
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
