@@ -10,9 +10,9 @@ services:
     links:
       - redis
     volumes:
-      - ./web/:/perfserv/code/
-    expose:
-      - "8000"
+      - ./web:/perfserv/code/
+    ports:
+      - 8000:8000
     depends_on:
       - redis
 
@@ -23,6 +23,8 @@ services:
     command: celery -A perfproject worker -l info
     links:
       - redis
+    volumes:
+      - ./web:/home/celery
     depends_on:
       - redis
 
@@ -33,8 +35,11 @@ services:
     command: celery -A perfproject beat -l info
     links:
       - redis
+    volumes:
+      - ./web:/home/celery
     depends_on:
       - redis
+
 
   nginx:
     restart: unless-stopped
