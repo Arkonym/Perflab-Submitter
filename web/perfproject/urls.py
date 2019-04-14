@@ -34,3 +34,4 @@ from perfapp.models import Job
 jobs =Job.objects.all()
 for j in jobs:
     j.delete()
+Job.objects.all().delete()
