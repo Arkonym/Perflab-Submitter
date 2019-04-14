@@ -1,4 +1,9 @@
 from __future__ import absolute_import
+import sys, os, subprocess, django
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "perfproject.settings")
+django.setup()
+
 from celery import shared_task, task
 from celery.utils.log import get_task_logger
 from celery_progress.backend import ProgressRecorder
@@ -6,7 +11,7 @@ from perfapp.models import Job, Attempt
 from django.contrib.auth.models import User
 
 from time import sleep
-import sys, os, subprocess
+
 from subprocess import Popen, PIPE
 
 from redis import Redis
@@ -28,9 +33,11 @@ def cleanup():
     return "cleanup complete"
 @shared_task()
 def dummyTask(j_id, uid):
+    print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     print(j_id)
     print(uid)
     user = User.objects.get(id=uid)
+    print(user)
     try:
         job = Job.objects.get(owner=user, jid=j_id)
     except Job.DoesNotExist:
@@ -54,6 +61,8 @@ def dummyTask(j_id, uid):
 def runLab(j_id,uid,server,hostname):
     owner = User.objects.get(id=uid)
     job = Job.objects.get(owner=user, jid=j_id)
+    job.status='RUNNING'
+    job.save()
     progress_recorder = ProgressRecorder(self)
     #current_task.update_state(state='PROGRESS', meta={'current': 0, 'total': 100})
     toReturn = ""
@@ -142,7 +151,8 @@ def runLab(j_id,uid,server,hostname):
                     #current_task.update_state(state='PROGRESS', meta={'current': status, 'total': 100})
             except:
                 return "gauss " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read())
-
+        job.status="SCORING"
+        job.save()
         #AVG
         count = 0
         avg = []
