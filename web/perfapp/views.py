@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
-from django.db.models import F
+from django.urls import reverse
+from django.db.models import F, Q
 from django.core.files import File
 from django.db import transaction
 
@@ -16,6 +17,8 @@ import sys,os,subprocess
 from subprocess import Popen,PIPE
 from redis import Redis
 red = Redis(host='redis', port=6379)
+
+from celery.task.control import revoke
 
 #from perfapp.dhcp import *
 from django.contrib.auth import logout
@@ -41,26 +44,27 @@ def get_client_ip(request):
 
 def handle_upload(job, f, f_name, j_path):
     path = j_path +"/"+f_name
-    dest = open(path, 'w+')
     if f.multiple_chunks:
-        for c in f.chunks():
-            dest.write(c)
+        with open(path, 'wb+') as dest:
+            for c in f.chunks():
+                dest.write(c)
     else:
-        dest.write(f.read())
+        with open(path, 'w+') as dest:
+            dest.write(f.read())
     dest.close()
     file = open(path)
     if f_name=="FilterMain.cpp":
-        job.FilterMain.save('new', File(file))
+        job.FilterMain.save('FilterMain', File(file))
     if f_name=="Makefile":
-        job.Makefile.save('new', File(file))
+        job.Makefile.save('Makefile', File(file))
     if f_name=="Filter.cpp":
-        job.Filter_c.save('new', File(file))
+        job.Filter_c.save('F_c', File(file))
     if f_name=="Filter.h":
-        job.Filter_h.save('new', File(file))
+        job.Filter_h.save('F_h', File(file))
     if f_name=="cs1300bmp.cc":
-        job.cs1300_c.save('new', File(file))
+        job.cs1300_c.save('cs13_c', File(file))
     if f_name=="cs1300bmp.h":
-        job.cs1300_h.save('new', File(file))
+        job.cs1300_h.save('cs13_h', File(file))
     job.save()
 
 
@@ -70,7 +74,7 @@ def handle_upload(job, f, f_name, j_path):
 def home(request):
     users = ScoreTable(User.objects.all(), 'profile.max_score')
     try:
-        jobs = JobTable(models.Job.objects.get(pk=request.user))
+        jobs = JobTable(models.Job.objects.filter(owner=request.user))
     except:
         jobs=None
     context={
@@ -88,7 +92,7 @@ def profile(request):
     except:
         history = None
     try:
-        open_jobs = Job.objects.filter(status!='DELETED', owner=user)
+        open_jobs = Job.objects.filter(owner=user)
     except:
         open_jobs = None
     context={
@@ -124,21 +128,27 @@ def register(request):
     return render(request, "registration/register.html", context=context)
 
 @login_required(redirect_field_name='/', login_url='/login/')
-def submitted(request):
-    pass
+def submitted(request, j_id):
+    task = dummyTask.delay(j_id, request.user.id)
+    j = Job.objects.get(owner=request.user, jid=j_id)
+    j.task_id = task.task_id
+    j.save()
+    context={
+    "title":"Success",
+    "job_id":j_id
+    }
+    return render(request, "success.html", context=context)
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submit(request):
         print (get_client_ip(request))
-        form = perfsubmission(request.POST, request.FILES)
         servers = ""
         if request.method == 'POST':
+            form = perfsubmission(request.POST, request.FILES)
             #print red.get('servers')
             if form.is_valid():
                 try:
-                    # b=Popen("mkdir ./uploads", shell=True, stdout=PIPE, stderr=PIPE)
-                    # b.wait()
-                    os.chdir('/code/uploads/')
+                    os.chdir('/perfserv/uploads/')
                     print(os.getcwd())
                 except:
                     print("failed directory change")
@@ -149,54 +159,55 @@ def submit(request):
                 except:
                     print("failed mkdir")
                 try:
-                    jid = Job.objects.filter(owner=request.user).last().id +1
+                    j_id = Job.objects.filter(owner=request.user).last().jid +1
                 except:
                     #no jobs in table
-                    jid=1
+                    j_id=1
                 try:
-                    print(jid)
-                    newJob = Job(owner=request.user)
+                    print(j_id)
+                    newJob = Job(jid=j_id,owner=request.user, note_field=form.cleaned_data["Note"])
                     newJob.save()
                 except:
-                    print('failed creating job')
+                     print('failed creating job')
                 try:
-                    path = "./"+str(request.user.id)+"/"+str(jid)
+                    path = "./"+str(request.user.id)+"/"+str(j_id)
                     print(path)
                     a = "mkdir "+ path
                     b = Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                     b.wait()
-                    """NEED TO FIGURE OUT FILE SAVE STILL"""
                     con_path = path +"/config.txt"
                     config = open(con_path, 'w+')
+                except: print("failed writing config")
+                try:
                     if request.FILES['FilterMain']:
-                        handle_uploaded_file(newJob, request.FILES['FilterMain'],"FilterMain.cpp",path)
+                        handle_upload(newJob, request.FILES['FilterMain'],"FilterMain.cpp",path)
                     try:
                         if request.FILES['Makefile']:
-                            handle_uploaded_file(newJob, request.FILES['Makefile'],"Makefile", path)
+                            handle_upload(newJob, request.FILES['Makefile'],"Makefile", path)
                             config.write("Makefile Y\n")
                     except:
                         config.write("Makefile N\n")
                     try:
                         if request.FILES['Filter_c']:
-                            handle_uploaded_file(newJob, request.FILES['Filter_c'],"Filter.cpp", path)
+                            handle_upload(newJob, request.FILES['Filter_c'],"Filter.cpp", path)
                             config.write("Filter.cpp Y\n")
                     except:
                         config.write("Filter.cpp N\n")
                     try:
                         if request.FILES['Filter_h']:
-                            handle_uploaded_file(newJob, request.FILES['Filter_h'],"Filter.h", path)
+                            handle_upload(newJob, request.FILES['Filter_h'],"Filter.h", path)
                             config.write("Filter.h Y\n")
                     except:
                         config.write("Filter.h N\n")
                     try:
                         if request.FILES['cs1300_c']:
-                            handle_uploaded_file(newJob, request.FILES['cs1300_c'],"cs1300bmp.cc", path)
+                            handle_upload(newJob, request.FILES['cs1300_c'],"cs1300bmp.cc", path)
                             config.write("cs1300bmp.cc Y\n")
                     except:
                         config.write("cs1300bmp.cc N\n")
                     try:
                         if request.FILES['cs1300_h']:
-                            handle_uploaded_file(newJob, request.FILES['cs1300_h'],"cs1300bmp.h", path)
+                            handle_upload(newJob, request.FILES['cs1300_h'],"cs1300bmp.h", path)
                             config.write("cs1300bmp.h Y\n")
                     except:
                         config.write("cs1300bmp.h N\n")
@@ -204,12 +215,14 @@ def submit(request):
                     config = open(con_path)
                     newJob.config.save('new', File(config))
                     config.close()
-                    return progress(request)
+                    newJob.save()
                 except:
                     newJob.delete()
                     print("except home")
+                return submitted(request, j_id)
             else:print("invalid form")
-
+        else:
+            form = perfsubmission()
         context={
             "title": "Submission Form",
             "form": form,
@@ -217,5 +230,20 @@ def submit(request):
         }
         return render(request, "perf.html",context=context)
 
-def progress(request, jid):
-    job = models.objects.get(pk=request.user, id=jid)
+def progress(request, j_id):
+    try:
+        job = Job.objects.get(owner=request.user, jid=j_id)
+    except Job.DoesNotExist:
+        job=None
+    context={
+        "title": "Open Job #"+str(jid),
+        "job" : job
+    }
+    return render(request, "progress.html", context=context)
+
+def stop_job(request, j_id):
+    job = Job.objects.get(owner=request.user, jid=j_id)
+    job.status='Stopped'
+    revoke(job.task_id)
+    job.save()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
