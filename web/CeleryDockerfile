@@ -15,6 +15,7 @@ ADD id_rsa /home/celery/.ssh/id_rsa
 RUN chown celery:celery -R /home/celery/.ssh
 ADD . /home/celery
 RUN chown celery:celery -R /home/celery
+RUN chown celery:celery -R /perfserv/uploads
 WORKDIR /home/celery
-USER celery
+# USER celery
 RUN chmod 400 /home/celery/.ssh/id_rsa
