@@ -20,11 +20,12 @@ services:
     build:
       context: ./web
       dockerfile: CeleryDockerfile
-    command: bash -c "chown -R celery:celery /home/celery && su celery && celery -A perfproject worker -l info"
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && celery -A perfproject worker -l info"
     links:
       - redis
     volumes:
-      - ./web:/home/celery
+      - ./web:/home/perfserv/code
+      - uploads:/home/perfserv/uploads
     depends_on:
       - redis
 
@@ -32,14 +33,17 @@ services:
     build:
       context: ./web
       dockerfile: CeleryDockerfile
-    command: bash -c "chown -R celery:celery /home/celery && su celery && celery -A perfproject beat -l info"
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && celery -A perfproject beat -l info"
     links:
       - redis
     volumes:
-      - ./web:/home/celery
+      - ./web:/home/perfserv/code
+      - uploads:/home/perfserv/uploads
     depends_on:
       - redis
 
+volumes:
+  uploads:
 
   nginx:
     restart: unless-stopped
