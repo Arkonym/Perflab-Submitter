@@ -77,8 +77,11 @@ class Job(models.Model):
 
     def delete(self, *args, **kwargs):
         if self.config:
-            if os.getcwd()!="/perfserv/uploads":
-                os.chdir("/perfserv/uploads")
+            if os.getcwd()!="/perfserv/uploads" or os.getcwd()!="/home/perfserv/uploads":
+                try:
+                    os.chdir("/perfserv/uploads")
+                except:
+                    os.chdir("/home/perfserv/uploads")
                 if os.path.exists("./"+str(self.owner.id)):
                     os.chdir("./"+str(self.owner.id))
                     a = "rm -r ./"+ str(self.jid)
