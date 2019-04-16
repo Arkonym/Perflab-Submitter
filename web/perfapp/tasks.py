@@ -22,17 +22,17 @@ logger=get_task_logger(__name__)
 @shared_task
 def cleanup():
     try:
-        jobs = Job.objects.all()
+        jobs = Job.objects.filter(deletable=True)
         print(jobs)
     except Job.DoesNotExist:
         return "empty jobs"
     for j in jobs:
-        if j.deletable==True:
             print(str(j.owner) + " : " +str(j))
             j.delete()
+    jobs.delete()
     return "cleanup complete"
-@shared_task()
-def dummyTask(j_id, uid):
+@shared_task(bind=True)
+def dummyTask(self,j_id, uid):
     print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     print(j_id)
     print(uid)
@@ -58,7 +58,7 @@ def dummyTask(j_id, uid):
     return 'task complete'
 
 @shared_task(bind=True)
-def runLab(j_id,uid,server,hostname):
+def runLab(self,j_id,uid,server,hostname):
     owner = User.objects.get(id=uid)
     job = Job.objects.get(owner=user, jid=j_id)
     job.status='RUNNING'
