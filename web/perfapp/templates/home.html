@@ -9,13 +9,50 @@
 <div class="grid-container fluid">
   <div class="grid-x"><div class=cell></div>&nbsp</div>
   {% if user.is_authenticated%}
-    <div class= "grid-x grid-padding-x">
+    <div class= "grid-x grid-margin-x">
       <div class="cell small-12">
         <a href="/submit/" class="button">New Submission</a>
       </div>
       {% if job_list %}
-      <div class="small-8 columns">
-        {% render_table job_list %}
+      <div class="cell small-12">
+        <table id="clickable" class="hover">
+          <thead>
+            <tr>
+              <th>Task #</th>
+              <th>Status</th>
+              <th>Time Started</th>
+              <th>Progress</th>
+            </tr>
+            </thead>
+          <tbody>
+            {% for job in jobs %}
+              {% if job.owner == user %}
+              <tr class="user-color">
+                <td style="display:none"><a href="/runlab/{{job.id}}"></a></td>
+                <td>{{job.id}}</td>
+                <td>{{job.status}}</td>
+                <td>{{job.time_started}}</td>
+                <td>
+                  <script>
+                    var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
+                    $(function () {
+                      CeleryProgressBar.initProgressBar(progressUrl)
+                    });
+                  </script>
+                  <div class="progress-wrapper">
+                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;"</div></div>
+                  <div class="progress-bar-message">{{entry.percent_complete}}%</div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td>{{job.id}}</td>
+                <td>{{job.status}}</td>
+                <td>{{job.time_started}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+          </tbody>
       </div>
       {% endif %}
     </div>

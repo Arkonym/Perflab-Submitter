@@ -9,7 +9,7 @@
 &nbsp;
 <div class="grid-container fluid">
   <div class="grid-x">
-    {% if max_score %}
+    {% if user.profile.max_score %} -->
     <h3>Best score: {{max_score}}</h3>
     {% endif %}
     </div>
@@ -56,18 +56,19 @@
             <td>{{entry.jid}}</td>
             <td>{{entry.status}}</td>
             {% localtime on  %}
-            <td>{{entry.time_stamp}}</td>
+            <td>{{entry.time_created}}</td>
             {% endlocaltime %}
             <td>
+              <div class="progress-wrapper">
+                <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+              </div>
+              <div id="progress-bar-message">Waiting...</div>
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
-                $(function(){
+                $(function () {
                   CeleryProgressBar.initProgressBar(progressUrl)
                 });
               </script>
-              <div class="progress-wrapper">
-                <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;"</div></div>
-              <div class="progress-bar-message">{{entry.percent_complete}}%</div>
             </td>
             <td>
               <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
@@ -83,4 +84,5 @@
   </div>
 </div>
 {% endblock %}
-<script src="{% static "js/celery_progress/celery_progress.js" %}"></script>
+{% block script%}
+{% endblock %}
