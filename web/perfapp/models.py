@@ -38,11 +38,11 @@ class Profile(models.Model):
 class Attempt(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     time_stamp = models.DateTimeField()
-    score = models.DecimalField(max_digits=4, decimal_places=2)
+    score = models.DecimalField(max_digits=4, decimal_places=2, blank=True, default=0)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
     def __str__(self):
-        return self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(score)+ ")"
+        return str(self.owner.id) + " : " +self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(self.score)+ ")"
 
 # @receiver(post_save, sender=Attempt)
 # def update_job_id(sender, instance, created, *args, **kwargs):
@@ -59,7 +59,8 @@ class Job(models.Model):
     jid = models.PositiveSmallIntegerField(blank=True, default=0) ##independent of primary key id
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id= models.CharField(max_length=40, blank=True, null=True, default="")
-    time_stamp = models.DateTimeField(auto_now_add=True)
+    time_created = models.DateTimeField(auto_now_add=True)
+    time_started = models.TimeField(blank=True, null=True, default=None)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
     percent_complete = models.SmallIntegerField(blank=True, default=0)
