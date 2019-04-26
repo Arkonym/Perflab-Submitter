@@ -3,6 +3,13 @@
 {{title}}
 {% endblock %}
 {% block content %}
+{% if not job%}
+<script>
+  function redirect(){
+    window.location.href = "/profile/";
+  } setTimeout(redirect, 3000);
+</script>
+{% else %}
   <div class="grid-container fluid">
     <div class="grid-x">
       <div class="cell small-6 medium-10">&nbsp</div>
@@ -22,9 +29,15 @@
         </div>
         <center>
           <h3>Job not found.</h3>
+          <script>
+            function redirect(){
+              window.location.href = "/home/";
+            } setTimeout(redirect, 3000);
+          </script>
         </center>
         {% endif %}
       <div class="cell small-6 medium-10">&nbsp</div>
       </div>
     </div>
+  {% endif %}
 {% endblock %}

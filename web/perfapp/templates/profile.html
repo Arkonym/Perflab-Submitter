@@ -52,13 +52,13 @@
         <tbody>
           {% for entry in open_jobs %}
           <tr>
-            <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td>
-            <td>{{entry.jid}}</td>
-            <td>{{entry.status}}</td>
+            <!-- <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td> -->
+            <td><a href="/runlab/{{entry.id}}">{{entry.jid}}</a></td>
+            <td><a href="/runlab/{{entry.id}}">{{entry.status}}</a></td>
             {% localtime on  %}
-            <td>{{entry.time_created}}</td>
+            <td><a href="/runlab/{{entry.id}}">{{entry.time_created}}</a></td>
             {% endlocaltime %}
-            <td>
+            <td><a href="/runlab/{{entry.id}}">
               <div class="progress-wrapper">
                 <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
               </div>
@@ -69,6 +69,7 @@
                   CeleryProgressBar.initProgressBar(progressUrl);
                 });
               </script>
+              </a>
             </td>
             <td>
               <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
