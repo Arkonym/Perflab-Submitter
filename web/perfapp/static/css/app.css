@@ -4,3 +4,9 @@ footer { background-color:red; margin-top:100px}
 }
 
 .user-color{ background-color: $maroon;}
+
+td a {
+   display: block;
+   /* border: 1px solid black; */
+   padding: 16px;
+}
