@@ -52,7 +52,6 @@
         <tbody>
           {% for entry in open_jobs %}
           <tr>
-            <!-- <td style="display:none"><a href="/runlab/{{entry.id}}"></a></td> -->
             <td><a href="/runlab/{{entry.id}}">{{entry.jid}}</a></td>
             <td><a href="/runlab/{{entry.id}}">{{entry.status}}</a></td>
             {% localtime on  %}
@@ -60,13 +59,13 @@
             {% endlocaltime %}
             <td><a href="/runlab/{{entry.id}}">
               <div class="progress-wrapper">
-                <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+                <div id="progress-bar {{entry.id}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
               </div>
-              <div id="progress-bar-message">Waiting...</div>
+              <div id="progress-bar-message {{entry.id}}">Waiting...</div>
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
                 document.addEventListener("DOMContentLoaded", function () {
-                  CeleryProgressBar.initProgressBar(progressUrl);
+                  CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.id}}", progressBarMessageId: "progress-bar-message {{entry.id}}"});
                 });
               </script>
               </a>
