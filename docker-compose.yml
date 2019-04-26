@@ -42,9 +42,6 @@ services:
     depends_on:
       - redis
 
-volumes:
-  uploads:
-
   nginx:
     restart: unless-stopped
     build: ./nginx/
@@ -57,3 +54,6 @@ volumes:
       - ./web/perfapp/static/:/static
     links:
       - web:web
+
+volumes:
+  uploads:
