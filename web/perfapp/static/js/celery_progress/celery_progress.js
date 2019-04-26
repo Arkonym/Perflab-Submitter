@@ -6,7 +6,7 @@ var CeleryProgressBar = (function () {
 
     function onErrorDefault(progressBarElement, progressBarMessageElement) {
         progressBarElement.style.backgroundColor = '#dc4f63';
-        progressBarMessageElement.innerHTML = "Uh-Oh, something went wrong!";
+        progressBarMessageElement.innerHTML = "Task Ended";
     }
 
     function onProgressDefault(progressBarElement, progressBarMessageElement, progress) {
