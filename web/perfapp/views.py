@@ -235,8 +235,12 @@ def progress(request, t_id):
         job = Job.objects.get(owner=request.user, id=t_id)
     except Job.DoesNotExist:
         job=None
+    try:
+        job_id = str(job.jid)
+    except:
+        job_id=""
     context={
-        "title": "Open Job #"+str(job.jid),
+        "title": "Open Job #"+job_id,
         "job" : job
     }
     return render(request, "progress.html", context=context)
