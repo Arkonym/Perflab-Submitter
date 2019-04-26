@@ -33,19 +33,20 @@
                 <td>{{job.status}}</td>
                 <td>{{job.time_started}}</td>
                 <td>
-                  <div class="progress-wrapper">
-                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;"</div></div>
-                  <div class="progress-bar-message"></div>
+                  <!-- <div class="progress-wrapper">
+                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+                  </div>
+                  <div id="progress-bar-message">Waiting...</div>
                   <script>
-                    function customProgress(progressBarElement, progressBarMessageElement, progress) {
-                      progressBarElement.style.width = progress.percent + "%";
-                      progressBarMessageElement.innerHTML = (progress.percent + "%");
-                      }
+                    // function customProgress(progressBarElement, progressBarMessageElement, progress) {
+                    //   progressBarElement.style.width = progress.percent + "%";
+                    //   progressBarMessageElement.innerHTML = (progress.percent + "%");
+                    //   }
                     var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
                     document.addEventListener("DOMContentLoaded", function () {
                       CeleryProgressBar.initProgressBar(progressUrl);
                     });
-                  </script>
+                  </script> -->
                 </td>
               </tr>
               {% else %}
@@ -54,19 +55,20 @@
                 <td>{{job.status}}</td>
                 <td>{{job.time_started}}</td>
                 <td>
-                  <div class="progress-wrapper">
-                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;"</div></div>
-                  <div class="progress-bar-message"></div>
+                  <!-- <div class="progress-wrapper">
+                    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+                  </div>
+                  <div id="progress-bar-message">Waiting...</div>
                   <script>
-                    function customProgress(progressBarElement, progressBarMessageElement, progress) {
-                      progressBarElement.style.width = progress.percent + "%";
-                      progressBarMessageElement.innerHTML = (progress.percent + "%");
-                      }
+                    // function customProgress(progressBarElement, progressBarMessageElement, progress) {
+                    //   progressBarElement.style.width = progress.percent + "%";
+                    //   progressBarMessageElement.innerHTML = (progress.percent + "%");
+                    //   }
                     var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
                     document.addEventListener("DOMContentLoaded", function () {
                       CeleryProgressBar.initProgressBar(progressUrl);
                     });
-                  </script>
+                  </script> -->
                 </td>
               </tr>
               {% endif %}

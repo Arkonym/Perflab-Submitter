@@ -14,14 +14,14 @@
     <div class="grid-x">
       <div class="cell small-6 medium-10">&nbsp</div>
       <div class="cell small-6 medium-10">
-        <div class='job'>
+        <div id='job_fr'>
         {% if job %}
         {% include 'job_frag.html' %}
         <script>
           var $job_id = {{job.id}}
           setInterval(
           function(job_id){
-            $('.job').html('').load("{% url 'perfapp:Polling' job.id}")
+            $('#job_fr').load("{% url 'perfapp:Polling' {{job.id}}")
           }, 3000
         );
         </script>
@@ -29,11 +29,6 @@
         </div>
         <center>
           <h3>Job not found.</h3>
-          <script>
-            function redirect(){
-              window.location.href = "/home/";
-            } setTimeout(redirect, 3000);
-          </script>
         </center>
         {% endif %}
       <div class="cell small-6 medium-10">&nbsp</div>
