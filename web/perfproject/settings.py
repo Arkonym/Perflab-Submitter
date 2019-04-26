@@ -133,7 +133,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
     'cleanup': {
         'task': 'perfapp.tasks.cleanup',
-        'schedule': crontab(minute='*/5')  # execute every minute
+        'schedule': crontab(minute='*/3')  # execute every minute
     }
 }
 
