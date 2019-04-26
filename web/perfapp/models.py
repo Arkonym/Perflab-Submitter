@@ -44,6 +44,11 @@ class Attempt(models.Model):
     def __str__(self):
         return str(self.owner.id) + " : " +self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(self.score)+ ")"
 
+    def save(self, *args, **kwargs):
+        super(Attempt, self).save(*args, **kwargs)
+        top_scores = Attempt.objects.filter(owner=self.owner).order_by('score')[:8].values_list('id', flat=True)
+        Attempt.objects.exclude(pk__in=list(top_scores)).delete()
+
 # @receiver(post_save, sender=Attempt)
 # def update_job_id(sender, instance, created, *args, **kwargs):
 #     if created:
@@ -74,7 +79,7 @@ class Job(models.Model):
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
     def __str__(self):
-        return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_stamp.strftime("%Y-%m-%d %H:%M:%S")
+        return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_created.strftime("%Y-%m-%d %H:%M:%S")
 
     def delete(self, *args, **kwargs):
         if self.config:
