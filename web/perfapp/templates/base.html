@@ -47,12 +47,12 @@
     </div>
     {% block content %}{{body}}{% endblock %}
 
-
+    <script src="{% static "js/vendor/jquery.js" %}"></script>
+    <script src="{% static "js/celery_progress/celery_progress.js" %}"></script>
     <script src="{% static "js/vendor/what-input.js" %}"></script>
     <script src="{% static "js/vendor/foundation.min.js" %}"></script>
     <script src="{% static "js/app.js" %}"></script>
     <script src="{% static "js/clickthru.js" %}"></script>
-
     {% block script %}{% endblock %}
 	</body>
   </html>
