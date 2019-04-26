@@ -74,7 +74,7 @@ def handle_upload(job, f, f_name, j_path):
 def home(request):
     users = ScoreTable(User.objects.all(), 'profile.max_score')
     try:
-        jobs = JobTable(models.Job.objects.filter(owner=request.user))
+        jobs = Job.objects.filter(Q(status='RUNNING')|Q(status='SCORING'))
     except:
         jobs=None
     context={
@@ -88,7 +88,7 @@ def home(request):
 def profile(request):
     user = request.user
     try:
-        history = Attempt.objects.filter(owner=user)
+        history = Attempt.objects.filter(owner=user).order_by('score')[:8]
     except:
         history = None
     try:
@@ -236,7 +236,7 @@ def progress(request, t_id):
     except Job.DoesNotExist:
         job=None
     context={
-        "title": "Open Job #"+str(t_id),
+        "title": "Open Job #"+str(job.jid),
         "job" : job
     }
     return render(request, "progress.html", context=context)
@@ -245,6 +245,10 @@ def stop_job(request, j_id):
     job = Job.objects.get(owner=request.user, jid=j_id)
     job.status='Stopped'
     job.deletable=True
-    revoke(job.task_id)
+    revoke(job.task_id, terminate=True, signal='SIGUSR1')
     job.save()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def task_poll(request, t_id):
+    job = Job.objects.filter(owner=request.user, id=t_id)
+    return render(request, 'job_frag.html', {'job':job})
