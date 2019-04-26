@@ -65,8 +65,8 @@
               <div id="progress-bar-message">Waiting...</div>
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
-                $(function () {
-                  CeleryProgressBar.initProgressBar(progressUrl)
+                document.addEventListener("DOMContentLoaded", function () {
+                  CeleryProgressBar.initProgressBar(progressUrl);
                 });
               </script>
             </td>
