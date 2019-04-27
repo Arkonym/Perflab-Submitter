@@ -16,7 +16,7 @@ class Server(models.Model):
 
 
     def __str__(self):
-        return self.hostname + " " + self.ip + " " + str(self.inUse)
+        return self.hostname + " : " + self.ip + " : In Use(" + str(self.inUse) + ")"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
