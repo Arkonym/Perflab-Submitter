@@ -29,7 +29,7 @@ from datetime import datetime
 from perfapp.forms import *
 from perfapp.tasks import *
 from perfapp.models import *
-from perfapp.tables import ScoreTable, HistoryTable, JobTable
+from perfapp.tables import ScoreTable
 
 
 
@@ -129,10 +129,19 @@ def register(request):
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submitted(request, j_id):
-    task = dummyTask.delay(j_id, request.user.id)
-    j = Job.objects.get(owner=request.user, jid=j_id)
-    j.task_id = task.task_id
-    j.save()
+    try:
+        serv = Server.objects.filter(inUse=False)[0]
+        if serv=None:
+            pass
+        serv.inUse=True
+        serv.uID=request.user.id
+        serv.save()
+        task = dummyTask.delay(j_id, request.user.id)
+        j = Job.objects.get(owner=request.user, jid=j_id)
+        j.task_id = task.task_id
+        j.save()
+    except:
+        pass
     context={
     "title":"Success",
     "job_id":j_id
@@ -256,3 +265,10 @@ def stop_job(request, j_id):
 def task_poll(request, t_id):
     job = Job.objects.filter(owner=request.user, id=t_id)
     return render(request, 'job_frag.html', {'job':job})
+
+def clear_user_queue(request):
+    user_jobs = Job.objects.filter(owner=request.user)
+    for j in user_jobs:
+        j.delete()
+    user_jobs.delete()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
