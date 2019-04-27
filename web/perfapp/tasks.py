@@ -8,7 +8,7 @@ from celery import shared_task, task
 from celery.utils.log import get_task_logger
 from celery.exceptions import SoftTimeLimitExceeded
 from celery_progress.backend import ProgressRecorder
-from perfapp.models import Job, Attempt
+from perfapp.models import Job, Attempt, Server
 from django.contrib.auth.models import User
 
 from time import sleep
@@ -20,6 +20,31 @@ red = Redis(host='redis', port=6379)
 
 logger=get_task_logger(__name__)
 
+@worker_ready.connect
+def init_servers():
+    try:
+        red.set('servers',0)
+        Server.objects.all().delete()
+        initial = 11
+        for lease in range(24):
+          a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@192.168.1."+str(initial+lease)+ " \"cat /proc/modules | grep aprofile\""
+          print a
+          b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+          b.wait()
+          c = b.stdout.read()
+          print b.stderr.read()
+          print c
+          if "aprofile" in c:
+              print c
+              red.incr('servers')
+              ip = "192.168.1."+str(initial+lease)
+              print ip
+              entry = servers(ip=ip, hostname="rpi"+str(lease+1))
+              entry.save()
+        return "Server lease init completed"
+    except:
+        return "Server init error. Ensure hardware available on network"
+
 @shared_task
 def cleanup():
     try:
@@ -28,10 +53,11 @@ def cleanup():
     except Job.DoesNotExist:
         return "empty jobs"
     for j in jobs:
-            print(str(j.owner) + " : " +str(j))
+            #print(str(j.owner) + " : " +str(j))
             j.delete()
     jobs.delete()
     return "cleanup complete"
+
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
     try:
@@ -50,7 +76,7 @@ def dummyTask(self,j_id, uid):
             job.save()
         job.status='COMPLETE'
         progress_recorder.set_progress(100,100)
-        newAttempt = Attempt(owner=user, note_field=job.note_field, score=79.99, time_stamp=job.time_created)
+        newAttempt = Attempt(owner=user, note_field=job.note_field, score=89.99, time_stamp=job.time_created)
         newAttempt.save()
         job.deletable=True
         job.save()
@@ -59,8 +85,9 @@ def dummyTask(self,j_id, uid):
         return 'task aborted'
 
 @shared_task(bind=True)
-def runLab(self,j_id,uid,server,hostname):
+def runLab(self,j_id,uid, serv):
     try:
+        server = serv.ip
         owner = User.objects.get(id=uid)
         job = Job.objects.get(owner=user, jid=j_id)
         job.status='RUNNING'
@@ -251,10 +278,11 @@ def runLab(self,j_id,uid,server,hostname):
             toReturn +="\nResulting score is " + str(score) + "\n"
         except:
             toReturn = "Unexpected error: " + str(sys.exc_info())
-        newAttempt = Attempt(owner=user, note_field=job.note_field, score=79.99, time_stamp=job.time_stamp)
+        newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
         newAttempt.save()
         return toReturn
     except SoftTimeLimitExceeded:
         b.kill()
-        a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"^C;\""
+        a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
+        b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         return "Task Stopped by user"
