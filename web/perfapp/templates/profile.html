@@ -9,10 +9,10 @@
 &nbsp;
 <div class="grid-container fluid">
   <div class="grid-x">
-    {% if user.profile.max_score %} -->
+    {% if user.profile.max_score %}
     <h3>Best score: {{max_score}}</h3>
     {% endif %}
-    </div>
+  </div>
   <div class="grid-x grid-padding-x align-center">
     <div class="cell medium-8">
       <table>
@@ -38,8 +38,14 @@
     </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
+      <div class="cell medium-8">
+        <a href="/submit/" class="button">New Submission</a>
+        <a href="/clear/" class="button alert">Clear Job Queue</a>
+      </div>
+  </div>
+  <div class="grid-x grid-padding-x align-center">
     <div class="cell medium-8">
-      <table id="clickable" class="hover">
+      <table class="hover">
         <thead>
           <tr>
             <th>Job #</th>
@@ -57,6 +63,7 @@
             {% localtime on  %}
             <td><a href="/runlab/{{entry.id}}">{{entry.time_created}}</a></td>
             {% endlocaltime %}
+            {% ifnotequal entry.status 'Stopped'%}
             <td><a href="/runlab/{{entry.id}}">
               <div class="progress-wrapper">
                 <div id="progress-bar {{entry.id}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
@@ -76,6 +83,9 @@
                 <input type="Submit" class="button alert" value="Stop" />
               </form>
             </td>
+            {%else%}
+            <td>&nbsp&nbsp</td>
+            {% endifnotequal %}
           </tr>
           {% endfor %}
         </tbody>
