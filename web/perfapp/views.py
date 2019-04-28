@@ -52,20 +52,20 @@ def handle_upload(job, f, f_name, j_path):
         with open(path, 'w+') as dest:
             dest.write(f.read())
     dest.close()
-    file = open(path)
-    if f_name=="FilterMain.cpp":
-        job.FilterMain.save('FilterMain', File(file))
-    if f_name=="Makefile":
-        job.Makefile.save('Makefile', File(file))
-    if f_name=="Filter.cpp":
-        job.Filter_c.save('F_c', File(file))
-    if f_name=="Filter.h":
-        job.Filter_h.save('F_h', File(file))
-    if f_name=="cs1300bmp.cc":
-        job.cs1300_c.save('cs13_c', File(file))
-    if f_name=="cs1300bmp.h":
-        job.cs1300_h.save('cs13_h', File(file))
-    job.save()
+    # file = open(path, 'r')
+    # if f_name=="FilterMain.cpp":
+    #     job.FilterMain = file
+    # if f_name=="Makefile":
+    #     job.Makefile = file
+    # if f_name=="Filter.cpp":
+    #     job.Filter_c = file
+    # if f_name=="Filter.h":
+    #     job.Filter_h = file
+    # if f_name=="cs1300bmp.cc":
+    #     job.cs1300_c = file
+    # if f_name=="cs1300bmp.h":
+    #     job.cs1300_h = file
+    # job.save()
 
 
 
@@ -88,7 +88,7 @@ def home(request):
 def profile(request):
     user = request.user
     try:
-        history = Attempt.objects.filter(owner=user).order_by('score')[:8]
+        history = Attempt.objects.filter(owner=user).order_by('-score')[:8]
     except:
         history = None
     try:
@@ -131,17 +131,23 @@ def register(request):
 def submitted(request, j_id):
     try:
         serv = Server.objects.filter(inUse=False)[0]
-        if serv=None:
-            pass
-        serv.inUse=True
-        serv.uID=request.user.id
-        serv.save()
-        task = dummyTask.delay(j_id, request.user.id)
+        if serv!=None:
+            serv.inUse=True
+            serv.uID=request.user.id
+            serv.save()
+        else: print("No free servers found")
+        task = runLab.delay(j_id, request.user.id, serv)
         j = Job.objects.get(owner=request.user, jid=j_id)
         j.task_id = task.task_id
+        j.status = 'Pending'
         j.save()
     except:
-        pass
+        task = dummyTask.delay(j_id, request.user.id)
+        j = Job.objects.get(owner=request.user, jid=j_id)
+        j.status = 'Pending'
+        j.task_id = task.task_id
+        print(task.task_id)
+        j.save()
     context={
     "title":"Success",
     "job_id":j_id
@@ -186,6 +192,7 @@ def submit(request):
                     b.wait()
                     con_path = path +"/config.txt"
                     config = open(con_path, 'w+')
+                    print(con_path)
                 except: print("failed writing config")
                 try:
                     if request.FILES['FilterMain']:
@@ -221,14 +228,17 @@ def submit(request):
                     except:
                         config.write("cs1300bmp.h N\n")
                     config.close()
-                    config = open(con_path)
-                    newJob.config.save('new', File(config))
-                    config.close()
+
+                    config = open(con_path, 'r')
+                    for line in config:
+                        print(line)
+                    newJob.config = File(config)
                     newJob.save()
+                    return submitted(request, j_id)
                 except:
                     newJob.delete()
                     print("except home")
-                return submitted(request, j_id)
+
             else:print("invalid form")
         else:
             form = perfsubmission()
@@ -262,9 +272,9 @@ def stop_job(request, j_id):
     job.save()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
-def task_poll(request, t_id):
+def task_status_poll(request, t_id):
     job = Job.objects.filter(owner=request.user, id=t_id)
-    return render(request, 'job_frag.html', {'job':job})
+    return render_to_response('job_frag.html', {'job':job})
 
 def clear_user_queue(request):
     user_jobs = Job.objects.filter(owner=request.user)
