@@ -14,7 +14,8 @@ urlpatterns = [
     path('register/', views.register),
     path('runlab/<int:t_id>', views.progress, name='Progress'),
     path('<int:j_id>/stop/', views.stop_job, name='Stop'),
-    path('ajax/task_poll/', views.task_poll, name='Polling')
+    path('clear/', views.clear_user_queue),
+    path('ajax/task_poll/<int:t_id>', views.task_status_poll, name='status')
 ]
 
 urlpatterns +=[
