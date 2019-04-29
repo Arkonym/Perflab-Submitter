@@ -37,62 +37,56 @@ class Profile(models.Model):
 
 class Attempt(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    rel_id = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
     time_stamp = models.DateTimeField()
-    score = models.DecimalField(max_digits=4, decimal_places=2, blank=True, default=0)
+    score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, default=0)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
+
 
     def __str__(self):
         return str(self.owner.id) + " : " +self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(self.score)+ ")"
 
     def save(self, *args, **kwargs):
+        user_attempts = Attempt.objects.filter(owner=self.owner)
+        if len(user_attempts) >0:
+            last_id = user_attempts.reverse()[0].rel_id
+            self.rel_id = last_id+1
+        else: self.rel_id=1
         super(Attempt, self).save(*args, **kwargs)
-        top_scores = Attempt.objects.filter(owner=self.owner).order_by('score')[:8].values_list('id', flat=True)
-        Attempt.objects.exclude(pk__in=list(top_scores)).delete()
+        if Attempt.objects.filter(owner=self.owner).count() > 15:
+            top = Attempt.objects.filter(owner=self.owner).order_by('-score')[:8]
+            Attempt.objects.exclude(pk__in=list(top)).delete()
 
-# @receiver(post_save, sender=Attempt)
-# def update_job_id(sender, instance, created, *args, **kwargs):
-#     if created:
-#         related_jobs = Job.objects.filter(owner=instance.owner)
-#         jid=1
-#         for j in related_jobs:
-#             j.id=jid
-#             j.save()
-#             jid+=1
 
 
 class Job(models.Model):
     jid = models.PositiveSmallIntegerField(blank=True, default=0) ##independent of primary key id
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id= models.CharField(max_length=40, blank=True, null=True, default="")
+    hostname = models.CharField(max_length=100, default="")
     time_created = models.DateTimeField(auto_now_add=True)
     time_started = models.TimeField(blank=True, null=True, default=None)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
     percent_complete = models.SmallIntegerField(blank=True, default=0)
-    config = models.FileField(blank=True, null=True)
-    FilterMain = models.FileField(blank=True, null=True)
-    Filter_c = models.FileField(blank=True, null=True)
-    Filter_h = models.FileField(blank=True, null=True)
-    Makefile = models.FileField(blank=True, null=True)
-    cs1300_c = models.FileField(blank=True, null=True)
-    cs1300_h = models.FileField(blank=True, null=True)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
+    fail_task = models.BooleanField(default=False)
+    errors = models.FileField(blank=True, null=True, default=None)
 
     def __str__(self):
         return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_created.strftime("%Y-%m-%d %H:%M:%S")
 
     def delete(self, *args, **kwargs):
-        if self.config:
-            if os.getcwd()!="/perfserv/uploads" or os.getcwd()!="/home/perfserv/uploads":
-                try:
-                    os.chdir("/perfserv/uploads")
-                except:
-                    os.chdir("/home/perfserv/uploads")
-                if os.path.exists("./"+str(self.owner.id)):
-                    os.chdir("./"+str(self.owner.id))
-                    a = "rm -r ./"+ str(self.jid)
-                    b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-                    b.wait()
-                    c= b.stdout.read()
-                    print(c)
+        if os.getcwd()!="/perfserv/uploads" or os.getcwd()!="/home/perfserv/uploads":
+            try:
+                os.chdir("/perfserv/uploads")
+            except:
+                os.chdir("/home/perfserv/uploads")
+            if os.path.exists("./"+str(self.owner.id)):
+                os.chdir("./"+str(self.owner.id))
+                a = "rm -r ./"+ str(self.jid)
+                b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+                b.wait()
+                c= b.stdout.read()
+                #print(c)
         super(Job, self).delete(*args, **kwargs)
