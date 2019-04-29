@@ -14,25 +14,74 @@
     <div class="grid-x">
       <div class="cell small-6 medium-10">&nbsp</div>
       <div class="cell small-6 medium-10">
-        <div id='job_fr'>
         {% if job %}
-        {% include 'job_frag.html' %}
-        <script>
-          var $job_id = {{job.id}}
-          setInterval(
-          function(job_id){
-            $('#job_fr').load("{% url 'perfapp:Polling' {{job.id}}")
-          }, 3000
-        );
-        </script>
-        {% else %}
+        <div id='job_fr'>
+          <center>
+            {%include "job_frag.html"%}
+          </center>
         </div>
+          {%ifnotequal job.status 'Error'%}
+          <div>
+            <center>
+            <h3>Progress</h3>
+              <div class="progress-wrapper">
+                <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+              </div>
+              <div id="progress-bar-message">Waiting...</div>
+            </center>
+          </div>
+          {% else%}
+          <div>{{job.errors}}
+          </div>
+          {% endifnotequal%}
+        {% else %}
         <center>
           <h3>Job not found.</h3>
+          <script>
+            function redirect(){
+              window.location.href = "/profile/";
+            } setTimeout(redirect, 2000);
+          </script>
         </center>
+        </div>
         {% endif %}
       <div class="cell small-6 medium-10">&nbsp</div>
       </div>
     </div>
   {% endif %}
 {% endblock %}
+{% block script %}
+{% ifnotequal job.status  'Error'%}
+<script>
+  $(document).ready(
+    setInterval(
+    function(){
+      // $.get("{% url 'perfapp:status' job.id %}", function(data){
+      //   $('#job_fr').html(data);
+      // });
+      $.ajax({
+        url: "{% url 'perfapp:status' job.jid %}",
+        type: "GET",
+        data: {"id": "{{job.jid}}" }
+        success: function(data){
+          $('#job_fr').html(data);}
+      })
+    }, 5000)
+    );
+</script>
+{% endifnotequal%}
+<script>
+
+  function customSuccess(progressBarElement, progressBarMessageElement) {
+    progressBarElement.innerHTML = (
+    '<figure class="image"><img src={% static img/aww-yeah.jpg}></figure>'
+    )
+    progressBarElement.style.backgroundColor = '#fff';
+    progressBarMessageElement.innerHTML = 'Ding!'
+  }
+  var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
+  $(function () {
+    CeleryProgressBar.initProgressBar(progressUrl, {onSuccess: customSuccess})
+  });
+</script>
+{% endblock%}

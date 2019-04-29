@@ -6,7 +6,7 @@ from django.core.files import File
 from django.db import transaction
 
 from django.template import Context
-from django.template.loader import get_template
+from django.template.loader import get_template, render_to_string
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.html import escape
@@ -89,6 +89,7 @@ def profile(request):
     user = request.user
     try:
         history = Attempt.objects.filter(owner=user).order_by('-score')[:8]
+        user.profile.max_score = history[0].score
     except:
         history = None
     try:
@@ -230,8 +231,8 @@ def submit(request):
                     config.close()
 
                     config = open(con_path, 'r')
-                    for line in config:
-                        print(line)
+                    # for line in config:
+                    #     print(line)
                     newJob.config = File(config)
                     newJob.save()
                     return submitted(request, j_id)
@@ -272,9 +273,11 @@ def stop_job(request, j_id):
     job.save()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
-def task_status_poll(request, t_id):
-    job = Job.objects.filter(owner=request.user, id=t_id)
-    return render_to_response('job_frag.html', {'job':job})
+def task_status_poll(request, id):
+    job = Job.objects.filter(owner=request.user, id=request.GET['id'])
+    html = render_to_string('job_frag.html', {'job': job})
+    # return render(request, 'job_frag.html', {'job':job})
+    return HttpResponse(html)
 
 def clear_user_queue(request):
     user_jobs = Job.objects.filter(owner=request.user)
