@@ -8,10 +8,10 @@
 {% block content %}
 &nbsp;
 <div class="grid-container fluid">
-  <div class="grid-x">
-    {% if user.profile.max_score %}
-    <h3>Best score: {{max_score}}</h3>
-    {% endif %}
+  <div class="grid-x grid-padding-x align-center">
+    <div class="cell medium-8">
+    <h4>User #: {{user.id}}</h4>
+    </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
     <div class="cell medium-8">
@@ -30,6 +30,7 @@
           <tr>
             <td>{{entry.id}}</td>
             <td>{{entry.score}}</td>
+            <td>&nbsp</td>
             <td>{{entry.time_stamp}}</td>
           </tr>
           {% endfor %}
@@ -66,13 +67,13 @@
             {% ifnotequal entry.status 'Stopped'%}
             <td><a href="/runlab/{{entry.id}}">
               <div class="progress-wrapper">
-                <div id="progress-bar {{entry.id}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+                <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
               </div>
-              <div id="progress-bar-message {{entry.id}}">Waiting...</div>
+              <div id="progress-bar-message {{entry.jid}}">Waiting...</div>
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
                 document.addEventListener("DOMContentLoaded", function () {
-                  CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.id}}", progressBarMessageId: "progress-bar-message {{entry.id}}"});
+                  CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.jid}}", progressBarMessageId: "progress-bar-message {{entry.jid}}"});
                 });
               </script>
               </a>
