@@ -1,26 +1,2 @@
-{% load static %}
-<script src="{% static 'js/vendor/jquery.js' %}"></script>
-
-<center>
 <h3>Job # {{job.jid}}</h3>
-<h3>Status {{job.status}}</h3>
-<h3>Progress</h3>
-<td>
-  <script>
-    function customSuccess(progressBarElement, progressBarMessageElement) {
-      progressBarElement.innerHTML = (
-      '<figure class="image"><img src={% static img/aww-yeah.jpg}></figure>'
-      )
-      progressBarElement.style.backgroundColor = '#fff';
-      progressBarMessageElement.innerHTML = 'Ding!'
-}
-    var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
-    $(function () {
-      CeleryProgressBar.initProgressBar(progressUrl)
-    });
-  </script>
-  <div class="progress-wrapper">
-    <div id="progress-bar" class="progress-bar" style="background-color: #68a9ef; width: 0%;"</div></div>
-  <div class="progress-bar-message">{{entry.percent_complete}}%</div>
-</td>
-</center>
+<h3>Status: {{job.status}}</h3>
