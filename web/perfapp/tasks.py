@@ -5,6 +5,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "perfproject.settings")
 django.setup()
 
 from celery import shared_task, task
+from celery.task.sets import subtask
 from celery.utils.log import get_task_logger
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
@@ -23,7 +24,7 @@ red = Redis(host='redis', port=6379)
 logger=get_task_logger(__name__)
 
 #@worker_ready.connect
-def init_servers(**_):
+def init(**_):
     try:
         red.set('servers',0)
         Server.objects.all().delete()
@@ -43,7 +44,7 @@ def init_servers(**_):
               print (ip)
               entry = servers(ip=ip, hostname="rpi"+str(lease+1))
               entry.save()
-        return "Server lease init completed"
+        # return "Server lease init completed"
     except:
         return "Server init error. Ensure hardware available on network"
 
@@ -59,7 +60,30 @@ def cleanup():
             j.delete()
     jobs.delete()
     return "cleanup complete"
-
+@shared_task
+def jobDeploy():
+    if red.get('server') > 0:
+        for user in User.objects.all():
+            if jobs = Job.objects.filter(owner=user) !=None:
+                cur_job = jobs[0]
+                if cur_job.status='New':
+                    try:
+                        serv = Server.objects.filter(inUse=False)[0]
+                        if serv!=None:
+                            serv.inUse=True
+                            serv.uID=request.user.id
+                            serv.save()
+                        else: print("No free servers found")
+                        task = runLab.subtask(j_id, request.user.id, serv)
+                        cur_job.task_id = task.task_id
+                        cur_job.status = 'Pending'
+                        cur_job.save()
+                    except:
+                        task = dummyTask.subtask(j_id, request.user.id)
+                        cur_job.status = 'Pending'
+                        cur_job.task_id = task.task_id
+                        print(task.task_id)
+                        j.save()
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
     try:
