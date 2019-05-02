@@ -13,6 +13,7 @@ class Server(models.Model):
     hostname = models.CharField(max_length=100, default="")
     uID = models.SmallIntegerField(blank=True, default=-1)
     inUse = models.BooleanField(default=False)
+    online = models.BooleanField(default=True)
 
 
     def __str__(self):
@@ -68,10 +69,8 @@ class Job(models.Model):
     time_started = models.TimeField(blank=True, null=True, default=None)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
-    percent_complete = models.SmallIntegerField(blank=True, default=0)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
     fail_task = models.BooleanField(default=False)
-    errors = models.FileField(blank=True, null=True, default=None)
 
     def __str__(self):
         return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_created.strftime("%Y-%m-%d %H:%M:%S")
@@ -90,3 +89,24 @@ class Job(models.Model):
                 c= b.stdout.read()
                 #print(c)
         super(Job, self).delete(*args, **kwargs)
+
+
+class Error(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    from_job_id = models.PositiveSmallIntegerField()
+    errors = models.CharField(max_length= 500, blank=True, null=True, default=None)
+
+    # def get_dir(instance):
+    #     id = instance.owner.id
+    #     if os.getcwd()!="/perfserv/uploads" or os.getcwd()!="/home/perfserv/uploads":
+    #         try:
+    #             os.chdir("/perfserv/uploads")
+    #             if not os.path.isdir("./"+str(id)):
+    #                 os.mkdir("./"+str(id)+"/errors")
+    #             return "perfserv/uploads/"+ str(id) + "/errors"
+    #         except:
+    #             os.chdir("/home/perfserv/uploads")
+    #             if not os.path.isdir("./"+str(id)):
+    #                 os.mkdir("./"+str(id)+"/errors")
+    #             return "/home/perfserv/uploads/"+ str(id) + "/errors"
+    #     else: return "/errors"
