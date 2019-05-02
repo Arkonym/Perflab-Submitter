@@ -130,25 +130,6 @@ def register(request):
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submitted(request, j_id):
-    try:
-        serv = Server.objects.filter(inUse=False)[0]
-        if serv!=None:
-            serv.inUse=True
-            serv.uID=request.user.id
-            serv.save()
-        else: print("No free servers found")
-        task = runLab.delay(j_id, request.user.id, serv)
-        j = Job.objects.get(owner=request.user, jid=j_id)
-        j.task_id = task.task_id
-        j.status = 'Pending'
-        j.save()
-    except:
-        task = dummyTask.delay(j_id, request.user.id)
-        j = Job.objects.get(owner=request.user, jid=j_id)
-        j.status = 'Pending'
-        j.task_id = task.task_id
-        print(task.task_id)
-        j.save()
     context={
     "title":"Success",
     "job_id":j_id

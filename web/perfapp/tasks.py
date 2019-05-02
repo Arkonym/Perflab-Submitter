@@ -5,7 +5,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "perfproject.settings")
 django.setup()
 
 from celery import shared_task, task
-from celery.task.sets import subtask
 from celery.utils.log import get_task_logger
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
@@ -25,25 +24,18 @@ logger=get_task_logger(__name__)
 
 #@worker_ready.connect
 def init(**_):
+    red.set('servers',0)
     try:
-        red.set('servers',0)
-        Server.objects.all().delete()
-        initial = 11
-        for lease in range(24):
-          a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@192.168.1."+str(initial+lease)+ " \"cat /proc/modules | grep aprofile\""
-          print (a)
-          b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-          b.wait()
-          c = b.stdout.read()
-          print (b.stderr.read())
-          print (c)
-          if "aprofile" in c:
-              print (c)
-              red.incr('servers')
-              ip = "192.168.1."+str(initial+lease)
-              print (ip)
-              entry = servers(ip=ip, hostname="rpi"+str(lease+1))
-              entry.save()
+        servers = Server.objects.all()
+        for serv in servers:
+            a="ping -c 1"+ str(serv.ip) + "| grep \"1 received\""
+            b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+            b.wait()
+            c = b.stdout.read().decode()
+            if c == None:
+                serv.online= False
+            else: red.incr('servers')
+
         # return "Server lease init completed"
     except:
         return "Server init error. Ensure hardware available on network"
@@ -62,28 +54,39 @@ def cleanup():
     return "cleanup complete"
 @shared_task
 def jobDeploy():
-    if red.get('server') > 0:
+    ###REMOVE THIS BIT###
+    red.set('servers', 0)
+    if red.get('servers') > 0:
         for user in User.objects.all():
-            if jobs = Job.objects.filter(owner=user) !=None:
+            jobs = Job.objects.filter(owner=user)
+            if jobs !=None:
                 cur_job = jobs[0]
-                if cur_job.status='New':
+                if cur_job.status=='New':
                     try:
                         serv = Server.objects.filter(inUse=False)[0]
                         if serv!=None:
+                            red.decr('servers')
                             serv.inUse=True
                             serv.uID=request.user.id
                             serv.save()
                         else: print("No free servers found")
-                        task = runLab.subtask(j_id, request.user.id, serv)
+                        task = runLab.delay(cur_job.jid, user.id, serv)
                         cur_job.task_id = task.task_id
                         cur_job.status = 'Pending'
                         cur_job.save()
                     except:
-                        task = dummyTask.subtask(j_id, request.user.id)
-                        cur_job.status = 'Pending'
-                        cur_job.task_id = task.task_id
-                        print(task.task_id)
-                        j.save()
+                        continue
+    else:
+        for user in User.objects.all():
+            jobs = Job.objects.filter(owner=user)
+            if jobs !=None:
+                cur_job = jobs[0]
+                if cur_job.status=='New':
+                    task = dummyTask.delay(cur_job.jid, user.id)
+                    cur_job.status = 'Pending'
+                    cur_job.task_id = task.task_id
+                    print(task.task_id)
+                    j.save()
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
     try:
@@ -105,6 +108,8 @@ def dummyTask(self,j_id, uid):
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=90.99, time_stamp=job.time_created)
         newAttempt.save()
+        new_Err= Error(owner=job.owner, from_job_id=job.jid, errors="Sample Error:\nTest Error")
+        new_Err.save()
         job.deletable=True
         job.save()
         return 'task complete'
@@ -127,7 +132,7 @@ def runLab(self,j_id,uid, serv):
         toReturn = ""
         try:
             path = "/home/perfserv/uploads/"+str(uid)+"/"+str(j_id)+"/"
-            errors = open(path+"Errors", "w+")
+            task_Err = Error(owner=job.owner, from_job_id = job.jid)
             #print path
             config = open("/home" +job.config.path,"r")
             progress_recorder.set_progress(1, 100)
@@ -147,9 +152,8 @@ def runLab(self,j_id,uid, serv):
             f = open(path+"FilterMain.cpp","r")
             for line in f:
                 if "unistd" in line:
-                    error.write("Filtermain.cpp:\nIllegal Library unistd")
-                    job.errors = File(error)
-                    error.close()
+                    task_Err.err+="Filtermain.cpp:\nIllegal Library unistd\n"
+                    task_Err.save()
                     return "Illegal Library unistd"
             a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+"FilterMain.cpp perfuser@"+server+":~/perflab-setup/"
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -182,11 +186,15 @@ def runLab(self,j_id,uid, serv):
             e = b.stderr.read().decode()
             if len(e)>0:
                 if "Error" in e:
-                    errors.write(e)
+                    task_Err.errors = "Failed at Make:\n"
+                    task_Err+=e
+                    task_Err.save()
                     raise SoftTimeLimitExceeded()
                 #print e
                 if not "ECDSA" in e:
-                    errors.write(e)
+                    task_Err.errors = "Failed at Make:\n"
+                    task_Err+=e
+                    task_Err.save()
                     raise SoftTimeLimitExceeded()
             #print c
             progress_recorder.set_progress(10, 100)
@@ -318,10 +326,11 @@ def runLab(self,j_id,uid, serv):
             toReturn = "Unexpected error: " + str(sys.exc_info())
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
         newAttempt.save()
+        task_Err.delete()
         job.deletable=True
         return toReturn
     except SoftTimeLimitExceeded:
-        errors.close()
+        task_Err.save()
         b.kill()
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
