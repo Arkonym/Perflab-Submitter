@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'perfapp',
     'django_tables2',
+    'celery_progress',
+    #'django_celery_beat',
 
 ]
 
@@ -78,7 +80,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'perfproject.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -133,7 +134,11 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
     'cleanup': {
         'task': 'perfapp.tasks.cleanup',
-        'schedule': crontab(minute='*/3')  # execute every minute
+        'schedule': crontab(minute='*/3')  # execute every 3 minutes
+    },
+    'jobDeploy':{
+        'task': 'perfapp.tasks.jobDeploy',
+        'schedule': crontab(minute='*') #execute every minute
     }
 }
 
