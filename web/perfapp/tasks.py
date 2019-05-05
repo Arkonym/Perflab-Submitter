@@ -9,7 +9,7 @@ from celery.utils.log import get_task_logger
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
 from celery_progress.backend import ProgressRecorder
-from perfapp.models import Job, Attempt, Server
+from perfapp.models import Job, Attempt, Server, Error
 from django.contrib.auth.models import User
 
 from time import sleep
@@ -56,10 +56,10 @@ def cleanup():
 def jobDeploy():
     ###REMOVE THIS BIT###
     red.set('servers', 0)
-    if red.get('servers') > 0:
+    if int(red.get('servers')) > 0:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
-            if jobs !=None:
+            if jobs.exists():
                 cur_job = jobs[0]
                 if cur_job.status=='New':
                     try:
@@ -69,7 +69,8 @@ def jobDeploy():
                             serv.inUse=True
                             serv.uID=request.user.id
                             serv.save()
-                        else: print("No free servers found")
+                        else: raise ValueError("No server avail")
+                        revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
                         task = runLab.delay(cur_job.jid, user.id, serv)
                         cur_job.task_id = task.task_id
                         cur_job.status = 'Pending'
@@ -79,16 +80,28 @@ def jobDeploy():
     else:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
-            if jobs !=None:
+            if jobs.exists():
                 cur_job = jobs[0]
                 if cur_job.status=='New':
                     task = dummyTask.delay(cur_job.jid, user.id)
                     cur_job.status = 'Pending'
                     cur_job.task_id = task.task_id
                     print(task.task_id)
-                    j.save()
+                    cur_job.save()
+    return "Deploy complete"
+@shared_task(bind=True)
+def placeholder(self):
+    ph_recorder = ProgressRecorder(self)
+    flag=True
+    while(flag!=False):
+        try:
+            pass
+        except SoftTimeLimitExceeded:
+            flag=False
+
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
+    progress_recorder = ProgressRecorder(self)
     try:
         user = User.objects.get(id=uid)
         try:
