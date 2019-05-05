@@ -31,6 +31,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='errors',
-            field=models.FileField(blank=True, default=None, null=True, upload_to=perfapp.models.get_dir),
+            field=models.FileField(blank=True, default=None, null=True),
         ),
     ]
