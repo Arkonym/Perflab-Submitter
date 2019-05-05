@@ -39,6 +39,7 @@
     </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
+    <div class="cell">&nbsp</div>
       <div class="cell medium-8">
         <a href="/submit/" class="button">New Submission</a>
         <a href="/clear/" class="button alert">Clear Job Queue</a>
@@ -60,22 +61,44 @@
           {% for entry in open_jobs %}
           <tr>
             <td><a href="/runlab/{{entry.id}}">{{entry.jid}}</a></td>
-            <td><a href="/runlab/{{entry.id}}">{{entry.status}}</a></td>
+            <td><a href="/runlab/{{entry.id}}" id="_status">{{entry.status}}</a>
+              {% if entry.task_id != None%}
+              <script>
+                var statusUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
+                  document.addEventListener("DOMContentLoaded", function updateStatus () {
+                    fetch(statusUrl).then(functcion(response)){
+                      response.json().then(function(data){
+                        if(data.progress){
+                          $('#_status').html("{% url 'perfapp:status' entry.jid}");
+                        }
+                        if(!data.complete){
+                          setTimeout(updateStatus, 5000, statusUrl);
+                        }else{
+                          $('#_status').html("{% url 'perfapp:status' entry.jid}");
+                        }
+                      })
+                    }
+                  }
+              </script>
+              {%endif%}
+            </td>
             {% localtime on  %}
             <td><a href="/runlab/{{entry.id}}">{{entry.time_created}}</a></td>
             {% endlocaltime %}
-            {% ifnotequal entry.status 'Stopped'%}
+            {% ifequal entry.status 'RUNNING'%}
             <td><a href="/runlab/{{entry.id}}">
               <div class="progress-wrapper">
                 <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
               </div>
               <div id="progress-bar-message {{entry.jid}}">Waiting...</div>
+              {%if entry.task_id != None%}
               <script>
                 var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
                 document.addEventListener("DOMContentLoaded", function () {
                   CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.jid}}", progressBarMessageId: "progress-bar-message {{entry.jid}}"});
                 });
               </script>
+              {%endif%}
               </a>
             </td>
             <td>
@@ -86,11 +109,50 @@
             </td>
             {%else%}
             <td>&nbsp&nbsp</td>
-            {% endifnotequal %}
+            {% endifequal %}
           </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="grid-x grid-padding-x align-center">
+    <div class="cell">&nbsp</div>
+    <div class="cell medium-8">
+      <h4> Error Reports </h4>
+      <table class="hover">
+        <thead>
+          <tr>
+            <th>From Job #</th>
+            <th>Timestamp</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+            </tr>
+          </thead>
+        <tbody>
+          {% for err in errors %}
+          <div class="reveal" id="Modal-{{err.id}}" data-reveal>
+            <h4>Errors for job# {{err.from_job_id}}</h4>
+            <p>
+              {{err.errors}}
+              </p>
+            <button class="close-button" data-close aria-label="close modal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <tr>
+            <td> {{err.from_job_id}}</td>
+            <td> {{err.time_stamp}}</td>
+            <td><button class="button" data-open="Modal-{{err.id}}">Error Report</button></td>
+            <td>
+              <form action="{% url 'perfapp:Delete' err.id %}" method="post">
+              {% csrf_token %}
+              <input type="Submit" class="button alert" value="Delete" />
+              </form></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
     </div>
   </div>
 </div>
