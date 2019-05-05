@@ -3,6 +3,11 @@
 {% load tz %}
 {% block head %}
 <title> Profile</title>
+<script>
+  function redirect(){
+    window.location.href = "/profile/";
+  } setTimeout(redirect, 300000);
+</script>
 {% endblock %}
 
 {% block content %}
@@ -59,34 +64,35 @@
         </thead>
         <tbody>
           {% for entry in open_jobs %}
-          <tr>
-            <td><a href="/runlab/{{entry.id}}">{{entry.jid}}</a></td>
-            <td><a href="/runlab/{{entry.id}}" id="_status">{{entry.status}}</a>
-              {% if entry.task_id != None%}
+          <tr data-open="Modal-{{entry.id}}">
+            <div class="reveal" id="Modal-{{entry.id}}" data-reveal>
+            <h4 id="_action">Currently: {{entry.cur_action}}</h4>
+            <script>
+              $(document).ready(
+                setInterval(function poll(){
+                    $('#_action').load("{% url 'perfapp:action' entry.jid%}");
+                }, 5000)
+              );
+            </script>
+            <button class="close-button" data-close aria-label="close modal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <td>{{entry.jid}}</td>
+            <td><p id="_status">{{entry.status}}</p>
               <script>
-                var statusUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
-                  document.addEventListener("DOMContentLoaded", function updateStatus () {
-                    fetch(statusUrl).then(functcion(response)){
-                      response.json().then(function(data){
-                        if(data.progress){
-                          $('#_status').html("{% url 'perfapp:status' entry.jid}");
-                        }
-                        if(!data.complete){
-                          setTimeout(updateStatus, 5000, statusUrl);
-                        }else{
-                          $('#_status').html("{% url 'perfapp:status' entry.jid}");
-                        }
-                      })
-                    }
-                  }
+                $(document).ready(
+                  setInterval(function stat_poll(){
+                      $('#_status').load("{% url 'perfapp:status' entry.jid%}");
+                  }, 5000)
+                );
               </script>
-              {%endif%}
             </td>
             {% localtime on  %}
-            <td><a href="/runlab/{{entry.id}}">{{entry.time_created}}</a></td>
+            <td>{{entry.time_created}}</td>
             {% endlocaltime %}
             {% ifequal entry.status 'RUNNING'%}
-            <td><a href="/runlab/{{entry.id}}">
+            <td>
               <div class="progress-wrapper">
                 <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
               </div>
@@ -99,7 +105,6 @@
                 });
               </script>
               {%endif%}
-              </a>
             </td>
             <td>
               <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
