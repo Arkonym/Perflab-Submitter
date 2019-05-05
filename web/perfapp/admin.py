@@ -21,3 +21,4 @@ class JobAdmin(admin.ModelAdmin):
 admin.site.register(models.Job, JobAdmin)
 admin.site.register(models.Server)
 admin.site.register(models.Attempt)
+admin.site.register(models.Error)

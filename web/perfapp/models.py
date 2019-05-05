@@ -21,7 +21,7 @@ class Server(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    max_score = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
+    max_score = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2)
     max_score_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -39,23 +39,28 @@ class Profile(models.Model):
 class Attempt(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     rel_id = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
-    time_stamp = models.DateTimeField()
+    time_stamp = models.DateTimeField(blank=True, null=True, default=None)
     score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, default=0)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
 
     def __str__(self):
-        return str(self.owner.id) + " : " +self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(self.score)+ ")"
+        if self.time_stamp!=None:
+            return str(self.owner.id) + " : " +str(self.rel_id) + " : "+self.time_stamp.strftime("%Y-%m-%d %H:%M:%S") + " (" + str(self.score)+ ")"
+        else: return str(self.owner.id) + " : " +str(self.rel_id) + " (" + str(self.score)+ ")"
 
     def save(self, *args, **kwargs):
         user_attempts = Attempt.objects.filter(owner=self.owner)
+        if self.owner.profile.max_score ==None or self.owner.profile.max_score <= self.score:
+            self.owner.profile.max_score = self.score
+            self.owner.save()
         if len(user_attempts) >0:
             last_id = user_attempts.reverse()[0].rel_id
             self.rel_id = last_id+1
         else: self.rel_id=1
         super(Attempt, self).save(*args, **kwargs)
         if Attempt.objects.filter(owner=self.owner).count() > 15:
-            top = Attempt.objects.filter(owner=self.owner).order_by('-score')[:8]
+            top = Attempt.objects.filter(owner=self.owner).order_by('-score')[:8].values_list('id', flat=True)
             Attempt.objects.exclude(pk__in=list(top)).delete()
 
 
@@ -63,14 +68,13 @@ class Attempt(models.Model):
 class Job(models.Model):
     jid = models.PositiveSmallIntegerField(blank=True, default=0) ##independent of primary key id
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    task_id= models.CharField(max_length=40, blank=True, null=True, default="")
+    task_id= models.CharField(max_length=40, blank=True, null=True, default=None)
     hostname = models.CharField(max_length=100, default="")
     time_created = models.DateTimeField(auto_now_add=True)
     time_started = models.TimeField(blank=True, null=True, default=None)
     status = models.CharField(max_length=10, default="New")
     deletable = models.BooleanField(default=False)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
-    fail_task = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_created.strftime("%Y-%m-%d %H:%M:%S")
@@ -94,6 +98,7 @@ class Job(models.Model):
 class Error(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     from_job_id = models.PositiveSmallIntegerField()
+    time_stamp = models.DateTimeField(blank=True, null=True, default=None)
     errors = models.CharField(max_length= 500, blank=True, null=True, default=None)
 
     # def get_dir(instance):
