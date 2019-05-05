@@ -52,27 +52,13 @@ def handle_upload(job, f, f_name, j_path):
         with open(path, 'w+') as dest:
             dest.write(f.read())
     dest.close()
-    # file = open(path, 'r')
-    # if f_name=="FilterMain.cpp":
-    #     job.FilterMain = file
-    # if f_name=="Makefile":
-    #     job.Makefile = file
-    # if f_name=="Filter.cpp":
-    #     job.Filter_c = file
-    # if f_name=="Filter.h":
-    #     job.Filter_h = file
-    # if f_name=="cs1300bmp.cc":
-    #     job.cs1300_c = file
-    # if f_name=="cs1300bmp.h":
-    #     job.cs1300_h = file
-    # job.save()
 
 
 
 # Create your views here.
 
 def home(request):
-    users = ScoreTable(User.objects.all(), 'profile.max_score')
+    users = ScoreTable(User.objects.all(), '-profile.max_score')
     try:
         jobs = Job.objects.filter(Q(status='RUNNING')|Q(status='SCORING'))
     except:
@@ -89,19 +75,25 @@ def profile(request):
     user = request.user
     try:
         history = Attempt.objects.filter(owner=user).order_by('-score')[:8]
-        user.profile.max_score = history[0].score
     except:
         history = None
+    user.profile.max_score = history[0].score
+    user.save()
     try:
         open_jobs = Job.objects.filter(owner=user)
     except:
         open_jobs = None
+    try:
+        logged_errors = Error.objects.filter(owner=user)
+    except:
+        logged_errors = None
     context={
         "title": "Profile",
         "user":user,
         "max_score": user.profile.max_score,
         "history": history,
-        "open_jobs":open_jobs
+        "open_jobs":open_jobs,
+        "errors": logged_errors
     }
     return render(request, "profile.html", context=context)
 
@@ -130,6 +122,10 @@ def register(request):
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submitted(request, j_id):
+    # task = placeholder.delay()
+    # job = Job.objects.filter(owner=request.user, jid = j_id)
+    # job.task_id = task.task_id
+    # print(task_id)
     context={
     "title":"Success",
     "job_id":j_id
@@ -255,14 +251,19 @@ def stop_job(request, j_id):
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
 def task_status_poll(request, id):
-    job = Job.objects.filter(owner=request.user, id=request.GET['id'])
-    html = render_to_string('job_frag.html', {'job': job})
+    job = Job.objects.filter(owner=request.user, jid=id)
+    status = job.status
     # return render(request, 'job_frag.html', {'job':job})
-    return HttpResponse(html)
+    return HttpResponse(status)
 
 def clear_user_queue(request):
     user_jobs = Job.objects.filter(owner=request.user)
     for j in user_jobs:
         j.delete()
     user_jobs.delete()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def clear_error(request, e_id):
+    error = Error.objects.get(owner=request.user, id=e_id)
+    error.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
