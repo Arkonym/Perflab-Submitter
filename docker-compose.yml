@@ -6,11 +6,14 @@ services:
 
   web:
     build: ./web
+    command: python3 /perfserv/code/manage.py init_servers
+    command: python3 /perfserv/code/manage.py clean_jobs
     command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     links:
       - redis
     volumes:
       - ./web:/perfserv/code/
+      - uploads:/perfserv/uploads
     ports:
       - 8000:8000
     depends_on:
