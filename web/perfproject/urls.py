@@ -31,8 +31,8 @@ urlpatterns = [
 
 #no good way to do this, but it works
 """comment out before migrations"""
-from perfapp.models import Job
-jobs =Job.objects.all()
-for j in jobs:
-    j.delete()
-Job.objects.all().delete()
+# from perfapp.models import Job
+# jobs =Job.objects.all()
+# for j in jobs:
+#     j.delete()
+# Job.objects.all().delete()
