@@ -211,6 +211,7 @@ def submit(request):
                     # for line in config:
                     #     print(line)
                     newJob.config = File(config)
+                    newJob.cur_action = "Waiting"
                     newJob.save()
                     return submitted(request, j_id)
                 except:
@@ -251,10 +252,18 @@ def stop_job(request, j_id):
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
 def task_status_poll(request, id):
-    job = Job.objects.filter(owner=request.user, jid=id)
+    try:
+        job = Job.objects.get(owner=request.user, jid=id)
+    except: return HttpResponseRedirect(reverse('perfapp:Profile'))
     status = job.status
     # return render(request, 'job_frag.html', {'job':job})
     return HttpResponse(status)
+def task_action_poll(request, id):
+    try:
+        job = Job.objects.get(owner=request.user, jid=id)
+    except: return HttpResponseRedirect(reverse('perfapp:Profile'))
+    cur_action = job.cur_action
+    return HttpResponse(cur_action)
 
 def clear_user_queue(request):
     user_jobs = Job.objects.filter(owner=request.user)

@@ -16,7 +16,8 @@ urlpatterns = [
     path('<int:j_id>/stop/', views.stop_job, name='Stop'),
     path('<int:e_id>/delete/', views.clear_error, name='Delete'),
     path('clear/', views.clear_user_queue),
-    path('task_poll/<int:id>', views.task_status_poll, name='status')
+    path('task_poll/stat/<int:id>', views.task_status_poll, name='status'),
+    path('task_poll/act/<int:id>', views.task_action_poll, name='action')
 ]
 
 urlpatterns +=[
