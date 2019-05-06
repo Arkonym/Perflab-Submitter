@@ -73,6 +73,7 @@ class Job(models.Model):
     time_created = models.DateTimeField(auto_now_add=True)
     time_started = models.TimeField(blank=True, null=True, default=None)
     status = models.CharField(max_length=10, default="New")
+    cur_action = models.CharField(max_length=50, default = None, blank=True, null=True)
     deletable = models.BooleanField(default=False)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
