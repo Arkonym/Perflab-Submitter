@@ -53,6 +53,7 @@ class Attempt(models.Model):
         user_attempts = Attempt.objects.filter(owner=self.owner)
         if self.owner.profile.max_score ==None or self.owner.profile.max_score <= self.score:
             self.owner.profile.max_score = self.score
+            self.owner.profile.max_score_date = self.time_stamp
             self.owner.save()
         if len(user_attempts) >0:
             last_id = user_attempts.reverse()[0].rel_id
