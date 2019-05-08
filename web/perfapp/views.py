@@ -254,14 +254,18 @@ def stop_job(request, j_id):
 def task_status_poll(request, id):
     try:
         job = Job.objects.get(owner=request.user, jid=id)
-    except: return HttpResponseRedirect(reverse('perfapp:Profile'))
+    except: return HttpResponse('NOT_FOUND')
     status = job.status
     # return render(request, 'job_frag.html', {'job':job})
     return HttpResponse(status)
+
+
 def task_action_poll(request, id):
     try:
         job = Job.objects.get(owner=request.user, jid=id)
-    except: return HttpResponseRedirect(reverse('perfapp:Profile'))
+        if(job.status=='COMPLETE'):
+            raise()
+    except: return HttpResponse('NOT_FOUND')
     cur_action = job.cur_action
     return HttpResponse(cur_action)
 
