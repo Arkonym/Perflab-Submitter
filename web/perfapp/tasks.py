@@ -24,7 +24,7 @@ from redis import Redis
 red = Redis(host='redis', port=6379)
 
 logger=get_task_logger(__name__)
-@worker_ready.connect
+#@worker_ready.connect
 def init(**_):
     print("Server lease check")
     red.set('servers',0)
@@ -58,40 +58,51 @@ def cleanup():
 @shared_task
 def jobDeploy():
     ###REMOVE THIS BIT###
-    #red.set('servers', 0)
+    red.set('servers', 0)
     print("Servers avail: " + red.get('servers').decode())
     if int(red.get('servers')) > 0:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                cur_job = jobs[0]
-                if cur_job.status=='New':
-                    try:
-                        serv = Server.objects.filter(inUse=False)[0]
-                        if serv!=None:
-                            red.decr('servers')
-                            serv.inUse=True
-                            serv.uID=request.user.id
-                            serv.save()
-                        else: raise ValueError("No server avail")
-                        #revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
-                        task = runLab.delay(cur_job.jid, user.id, serv)
-                        cur_job.task_id = task.task_id
-                        cur_job.status = 'Pending'
-                        cur_job.save()
-                    except:
+                if jobs.exists():
+                    running = jobs.filter(status='RUNNING')
+                    if running.exists():
                         continue
+                    else:
+                        pending = jobs.filter(status='PENDING')[0]
+                        if pending.exists():
+                            try:
+                                cur_job = pending[0]
+                                serv = Server.objects.filter(inUse=False)[0]
+                                if serv!=None:
+                                    red.decr('servers')
+                                    serv.inUse=True
+                                    serv.uID=request.user.id
+                                    serv.save()
+                                else: raise ValueError("No server avail")
+                                #revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
+                                task = runLab.delay(cur_job.jid, user.id, serv)
+                                cur_job.task_id = task.task_id
+                                cur_job.status = 'Pending'
+                                cur_job.save()
+                                break;
+                            except:
+                                continue
     else:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                cur_job = jobs[0]
-                if cur_job.status=='New':
-                    task = dummyTask.delay(cur_job.jid, user.id)
-                    cur_job.status = 'Pending'
-                    cur_job.task_id = task.task_id
-                    print(task.task_id)
-                    cur_job.save()
+                running = jobs.filter(status='RUNNING')
+                if running.exists():
+                    continue
+                else:
+                    pending = jobs.filter(status='Pending')
+                    if pending.exists():
+                        cur_job=pending[0]
+                        task = dummyTask.delay(cur_job.jid, user.id)
+                        cur_job.task_id = task.task_id
+                        print(task.task_id)
+                        cur_job.save()
     return "Deploy complete"
 @shared_task(bind=True)
 def placeholder(self):
@@ -120,21 +131,23 @@ def dummyTask(self,j_id, uid):
             sleep(1)
             progress_recorder.set_progress(i+1, 100)
             if i<10:
-                job.cur_action ="Setting Up...\n"
-            elif i<20:
-                job.cur_action +="Compiling\n"
+                job.cur_action ="Setting Up..."
+            elif i<=20:
+                job.cur_action ="Compiling..."
             elif i<90:
-                job.cur_action +="Running\n"
+                job.cur_action ="Running"
             else:
-                job.cur_action +="SCORING\n"
+                job.cur_action ="SCORING"
+            job.save()
 
         job.status='COMPLETE'
         score = random.randint(70, 95)
         job.cur_action += "Score: " + str(score)
+        job.save()
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
         newAttempt.save()
-        if job.notefield=='Demo: error':
+        if job.note_field=='Demo: error':
             new_Err= Error(owner=job.owner, from_job_id=job.jid, errors="Sample Error:\nTest Error")
             new_Err.save()
         job.deletable=True
