@@ -6,9 +6,7 @@ services:
 
   web:
     build: ./web
-    command: python3 /perfserv/code/manage.py init_servers
-    command: python3 /perfserv/code/manage.py clean_jobs
-    command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py clean_jobs && python manage.py init_servers && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     links:
       - redis
     volumes:
@@ -31,6 +29,7 @@ services:
       - uploads:/home/perfserv/uploads
     depends_on:
       - redis
+      - web
 
   celery-beat:
     build:
@@ -44,6 +43,7 @@ services:
       - uploads:/home/perfserv/uploads
     depends_on:
       - redis
+      - web
 
   nginx:
     restart: unless-stopped
