@@ -66,7 +66,7 @@
           {% for entry in open_jobs %}
           <tr data-open="Modal-{{entry.id}}">
             <div class="reveal" id="Modal-{{entry.id}}" data-reveal>
-            <h4 id="_action_{{entry.id}}">Currently: {{entry.cur_action}}</h4>
+            <h4 id="_action_{{entry.id}}">{{entry.cur_action}}</h4>
             <script>
               var Row={};
               $(document).ready(function(){
@@ -78,9 +78,13 @@
                       if(data=='NOT_FOUND'){
                         clearInterval(Row['act_int_{{entry.id}}']);
                       }
-                      else{
-                        $('#_action_{{entry.id}}').text(data);
+                      else if(Row["last_act_{{entry.id}}"]==""){
+                        $('#_action_{{entry.id}}').text(data)
                       }
+                      else if( Row["last_act_{{entry.id}}"] != data){
+                        $('#_action_{{entry.id}}').append("</br>",data);
+                      }
+                      Row["last_act_{{entry.id}}"] = data;
                     }, 'html');
                   };
               });
@@ -99,13 +103,13 @@
                       $.get("{% url 'perfapp:status' entry.jid%}", function(data){
                         console.log(Row['stat_int_{{entry.id}}']);
                         console.log(data);
-                        if(Row["last_stat_{{entry.id}}"] =='New' && data=='RUNNING'){
+                        if(Row["last_stat_{{entry.id}}"] =='Pending'  && data=='RUNNING'){
                           window.location.href = "/profile/";
                         }
                         if(data == 'NOT_FOUND'){
                           window.location.href = "/profile/";
                         }
-                        else if (data == 'COMPLETE'){
+                        else if (data == 'COMPLETE' || data=='STOPPED'){
                           $('#_status_{{entry.id}}').text(data);
                           clearInterval(Row['stat_int_{{entry.id}}']);
                         }
@@ -122,7 +126,7 @@
             {% localtime on  %}
             <td>{{entry.time_created}}</td>
             {% endlocaltime %}
-            {% ifequal entry.status 'RUNNING'%}
+            {% if entry.status == 'RUNNING'%}
             <td>
               <div class="progress-wrapper">
                 <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
@@ -143,9 +147,16 @@
                 <input type="Submit" class="button alert" value="Stop" />
               </form>
             </td>
+            {%elif entry.status == 'Pending'%}
+            <td>
+              <form action="{% url 'perfapp:Cancel' entry.jid %}" method="post">
+                {% csrf_token %}
+                <input type="Submit" class="button alert" value="Cancel" />
+              </form>
+            </td>
             {%else%}
             <td>&nbsp&nbsp</td>
-            {% endifequal %}
+            {% endif %}
           </tr>
           {% endfor %}
         </tbody>
