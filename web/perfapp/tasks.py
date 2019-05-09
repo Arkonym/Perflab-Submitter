@@ -70,7 +70,7 @@ def jobDeploy():
                             serv.uID=request.user.id
                             serv.save()
                         else: raise ValueError("No server avail")
-                        revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
+                        #revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
                         task = runLab.delay(cur_job.jid, user.id, serv)
                         cur_job.task_id = task.task_id
                         cur_job.status = 'Pending'
@@ -118,11 +118,13 @@ def dummyTask(self,j_id, uid):
 
 
         job.status='COMPLETE'
+        job.cur_action="Scoring"
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=90.99, time_stamp=job.time_created)
         newAttempt.save()
-        new_Err= Error(owner=job.owner, from_job_id=job.jid, errors="Sample Error:\nTest Error")
-        new_Err.save()
+        if job.notefield() =="Demo: error":
+            new_Err= Error(owner=job.owner, from_job_id=job.id, errors="Make Error:\nTest Error")
+            new_Err.save()
         job.deletable=True
         job.save()
         return 'task complete'
