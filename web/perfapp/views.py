@@ -245,10 +245,19 @@ def progress(request, t_id):
 
 def stop_job(request, j_id):
     job = Job.objects.get(owner=request.user, jid=j_id)
-    job.status='Stopped'
+    job.status='STOPPED'
+    job.cur_action='STOPPED'
     job.deletable=True
     revoke(job.task_id, terminate=True, signal='SIGUSR1')
     job.save()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def cancel_job(request, j_id):
+    job = Job.objects.get(owner=request.user, jid=j_id)
+    job.status='CANCELED'
+    job.cur_action='CANCELED'
+    job.save()
+    job.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
 def task_status_poll(request, id):
@@ -263,7 +272,7 @@ def task_status_poll(request, id):
 def task_action_poll(request, id):
     try:
         job = Job.objects.get(owner=request.user, jid=id)
-        if(job.status=='COMPLETE'):
+        if(job.status=='COMPLETE' or job.status=='STOPPED'):
             raise()
     except: return HttpResponse('NOT_FOUND')
     cur_action = job.cur_action
