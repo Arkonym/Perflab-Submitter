@@ -169,7 +169,7 @@ def runLab(self,j_id,uid, serv_id):
         server = serv.ip
         user = User.objects.get(id=uid)
         job_not_found=False
-        task_Err = Error(owner=job.owner, from_job_id = j_id)
+        task_Err = Error(owner=user, from_job_id = j_id)
         error_flag=False
         try:
             job = Job.objects.get(owner=user, jid=j_id)
