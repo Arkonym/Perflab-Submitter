@@ -22,21 +22,39 @@
     <div class="cell medium-8">
       <table>
         <thead>
-          <tr>
+          <tr data-toggle="_attempts_table">
             <th style="display:none"></th>
             <th>Attempt #</th>
             <th>Score</th>
             <th>&nbsp;</th>
             <th>Date</th>
           </tr>
+          <div class="dropdown-pane" data-position="top left" id="_attempts_table" data-dropdown data-close-on-click="true">
+            <form action="{% url 'perfapp:Clear_All_Att'%}" method="post">
+            {% csrf_token %}
+            <input type="Submit" class="button alert" value="Clear All Attempts" onclick="return confirm('Are you sure? This cannot be undone.')" />
+          </form>
+            </div>
         </thead>
         <tbody>
           {% for entry in history %}
-          <tr>
+          <tr data-toggle="att_drop_{{entry.id}}">
             <td>{{entry.id}}</td>
             <td>{{entry.score}}</td>
             <td>&nbsp</td>
             <td>{{entry.time_stamp}}</td>
+            <div class="dropdown-pane" id="att_drop_{{entry.id}}" data-dropdown data-hover="true" data-hover-pane="true">
+              {{entry.result_out}}
+              {% if entry.notefield != None%}
+              </br>
+              {{entry.notefield}}
+              {%endif%}
+              </br></br>
+              <form action="{% url 'perfapp:Delete_Att' entry.id %}" method="post">
+                {% csrf_token %}
+                <input type="Submit" class="hollow button alert" value="Clear Attempt" />
+              </form>
+            </div>
           </tr>
           {% endfor %}
         </tbody>
@@ -47,7 +65,7 @@
     <div class="cell">&nbsp</div>
       <div class="cell medium-8">
         <a href="/submit/" class="button">New Submission</a>
-        <a href="/clear/" class="button alert">Clear Job Queue</a>
+        <a href="/clear/" class="button alert" onclick="return confirm('Are you sure? This cannot be undone.')">Clear Job Queue</a>
       </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
@@ -90,7 +108,14 @@
             <td>
               <form action="{% url 'perfapp:Cancel' entry.jid %}" method="post">
                 {% csrf_token %}
-                <input type="Submit" class="button alert" value="Cancel" />
+                <input type="Submit" class="button warning" value="Cancel" />
+              </form>
+            </td>
+            {%elif entry.status == 'ERROR'%}
+            <td>
+              <form action="{% url 'perfapp:Cancel' entry.jid %}" method="post">
+                {% csrf_token %}
+                <input type="Submit" class="button secondary" value="Clear" />
               </form>
             </td>
             {%else%}
@@ -104,22 +129,25 @@
                     $.get("{% url 'perfapp:status' entry.jid%}", function(data){
                       console.log(Row['stat_int_{{entry.id}}']);
                       console.log(data);
+                      var stat = data.split(" ")[0];
+                      var new_stat = data;
+                      //.replace("\n", '</br>')
                       if(Row["last_stat_{{entry.id}}"] =="Pending"  && data=="RUNNING"){
-                        //$('#_prog_bar').load(window.location.href + " #_prog-bar");
+                        //$('#_prog_bar').load(location.href + " #_prog-bar");
                          window.location.href = "/profile/";
                       }
-                      if(data == 'NOT_FOUND'){
+                      if(stat == 'NOT_FOUND'){
                         clearInterval(Row['stat_int_{{entry.id}}']);
                         // window.location.href = "/profile/";
                       }
-                      else if (data == "COMPLETE" || data=="STOPPED"){
-                        $('#_status_{{entry.id}}').text(data);
+                      else if (stat == "COMPLETE" || stat=="STOPPED"){
+                        $('#_status_{{entry.id}}').text(new_stat);
                         clearInterval(Row['stat_int_{{entry.id}}']);
                       }
                       else{
-                        $('#_status_{{entry.id}}').text(data);
+                        $('#_status_{{entry.id}}').text(new_stat);
                       }
-                      Row["last_stat_{{entry.id}}"] = data;
+                      Row["last_stat_{{entry.id}}"] = stat;
                     }, 'html');
                   };
                 Row['act_int_{{entry.id}}'] = setInterval(poll, 5000);
@@ -127,6 +155,7 @@
                     $.get("{% url 'perfapp:action' entry.jid%}", function(data){
                       console.log(Row['last_act_{{entry.id}}']);
                       console.log(data);
+
                       if(data=='NOT_FOUND'){
                         clearInterval(Row['act_int_{{entry.id}}']);
                       }
