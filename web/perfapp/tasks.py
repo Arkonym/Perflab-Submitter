@@ -24,14 +24,15 @@ from redis import Redis
 red = Redis(host='redis', port=6379)
 
 logger=get_task_logger(__name__)
-#@worker_ready.connect
-def init(**_):
+
+@shared_task
+def init():
     print("Server lease check")
     red.set('servers',0)
     try:
         servers = Server.objects.all()
         for serv in servers:
-            a="ping -c 1"+ str(serv.ip) + "| grep \"1 received\""
+            a="ping -c 1 "+ str(serv.ip) + "| grep \"1 received\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read().decode()
@@ -69,7 +70,7 @@ def jobDeploy():
                     if running.exists():
                         continue
                     else:
-                        pending = jobs.filter(status='PENDING')[0]
+                        pending = jobs.filter(status='PENDING')
                         if pending.exists():
                             try:
                                 cur_job = pending[0]
@@ -80,10 +81,10 @@ def jobDeploy():
                                     serv.uID=request.user.id
                                     serv.save()
                                 else: raise ValueError("No server avail")
-                                #revoke(cur_job.task_id, terminate=True, signal='SIGUSR1')
-                                task = runLab.delay(cur_job.jid, user.id, serv)
+                                if cur_job.note_field.split(' ', 1)[0] == "Demo":
+                                    task= dummyTask.delay(cur_jod.jid, user.id)
+                                else:task = runLab.delay(cur_job.jid, user.id, serv)
                                 cur_job.task_id = task.task_id
-                                cur_job.status = 'Pending'
                                 cur_job.save()
                                 break;
                             except:
@@ -146,8 +147,9 @@ def dummyTask(self,j_id, uid):
         job.save()
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
+        newAttempt.result_out = "Demo score is: " + score
         newAttempt.save()
-        if job.note_field=='Demo: error':
+        if job.note_field=='Demo error':
             new_Err= Error(owner=job.owner, from_job_id=job.jid, errors="Sample Error:\nTest Error")
             new_Err.save()
         job.deletable=True
@@ -161,6 +163,7 @@ def runLab(self,j_id,uid, serv):
     try:
         server = serv.ip
         owner = User.objects.get(id=uid)
+        job_not_found=False
         try:
             job = Job.objects.get(owner=user, jid=j_id)
             job.status='RUNNING'
@@ -169,13 +172,17 @@ def runLab(self,j_id,uid, serv):
             job.save()
         except: raise SoftTimeLimitExceeded()
         progress_recorder = ProgressRecorder(self)
+        task_Err = Error(owner=job.owner, from_job_id = job.jid)
         toReturn = ""
+        error_flag=False
         try:
             path = "/home/perfserv/uploads/"+str(uid)+"/"+str(j_id)+"/"
-            task_Err = Error(owner=job.owner, from_job_id = job.jid)
+
             #print path
             config = open("/home" +job.config.path,"r")
             progress_recorder.set_progress(1, 100)
+            job.cur_action = "Setting Up"
+            job.save()
 
             a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"rm -rf perflab-setup\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -189,19 +196,26 @@ def runLab(self,j_id,uid, serv):
             c = b.stdout.read()
             progress_recorder.set_progress(3, 100)
 
+            job.cur_action = "Scanning FilterMain"
+            job.save()
+
             f = open(path+"FilterMain.cpp","r")
             for line in f:
                 if "unistd" in line:
                     task_Err.err+="Filtermain.cpp:\nIllegal Library unistd\n"
                     task_Err.save()
-                    return "Illegal Library unistd"
-            a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+"FilterMain.cpp perfuser@"+server+":~/perflab-setup/"
-            b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-            b.wait()
-            c = b.stdout.read()
+                    error_flag=True
+            if error_flag==False:
+                a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+"FilterMain.cpp perfuser@"+server+":~/perflab-setup/"
+                b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+                b.wait()
+                c = b.stdout.read()
             progress_recorder.set_progress(4, 100)
 
+            job.cur_action = "Sending Files"
+            job.save()
             """For each file in config, check illegal lib, then copy to server"""
+
             for line in config:
             	#print line
                 line = line.split()
@@ -210,14 +224,23 @@ def runLab(self,j_id,uid, serv):
                     print (line[0])
                     for line2 in f:
                         if "unistd" in line2:
-                            errors.write(line[0] + ": illegal unistd")
-                            raise SoftTimeLimitExceeded()
-                    a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+str(line[0])+" perfuser@"+server+":~/perflab-setup/"
-                    print (a)
-                    b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-                    b.wait()
-                    c = b.stdout.read()
+                            task_Err.errors+=(line[0] + ": illegal unistd\n")
+                            task_Err.save()
+                            error_flag=True
+                    if error==False:
+                        a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+str(line[0])+" perfuser@"+server+":~/perflab-setup/"
+                        print (a)
+                        b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
+                        b.wait()
+                        c = b.stdout.read()
+            if error_flag==True:
+                job.status="ERROR"
+                task_Err.save()
+                raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(5, 100)
+
+            job.cur_action = "Compiling..."
+            job.save()
 
             a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; make filter\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -238,6 +261,8 @@ def runLab(self,j_id,uid, serv):
                     raise SoftTimeLimitExceeded()
             #print c
             progress_recorder.set_progress(10, 100)
+            job.cur_action = "Running Gauss"
+            job.save()
 
             status = 10.0
             tests = 5
@@ -265,8 +290,10 @@ def runLab(self,j_id,uid, serv):
                         progress_recorder.set_progress(status, 100)
 
                 except:
-                    return "gauss " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read())
-            job.status="SCORING"
+                     task_Err.errors+="Gauss:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                     task_Err.save()
+                     raise SoftTimeLimitExceeded()
+            job.cur_action = "Running Avg"
             job.save()
             #AVG
             count = 0
@@ -284,10 +311,15 @@ def runLab(self,j_id,uid, serv):
                         avg = avg + [score]
                         status = status + increment
                         count = count + 1
+                        progress_recorder.set_progress(status, 100)
 
                 except:
-                    return "avg " + str(sys.exc_info())+ " " + hostname
+                    task_Err.errors+="Avg:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                    task_Err.save()
+                    raise SoftTimeLimitExceeded()
 
+            job.cur_action = "Running HLine"
+            job.save()
             #HLINE
             count = 0
             hline = []
@@ -296,6 +328,7 @@ def runLab(self,j_id,uid, serv):
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read()
+                e = b.stderr.read().decode()
                 line = c.split()
                 try:
                     score = float(line[-1])
@@ -304,10 +337,15 @@ def runLab(self,j_id,uid, serv):
                         hline = hline + [score]
                         status = status + increment
                         count = count + 1
+                        progress_recorder.set_progress(status, 100)
 
                 except:
-                    return "hline " + str(sys.exc_info()) + " " + hostname
-
+                    task_Err.errors+="Hline:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                    task_Err.save()
+                    error_flag=True
+                    raise SoftTimeLimitExceeded()
+            job.cur_action = "Running Emboss"
+            job.save()
             #EMBOSS
             count = 0
             emboss = []
@@ -315,8 +353,8 @@ def runLab(self,j_id,uid, serv):
                 a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./emboss.sh\""
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
-                c = b.stdout.read()
-                e = b.stderr.read()
+                c = b.stdout.read().decode()
+
                 line = c.split()
                 #print c
                 try:
@@ -326,16 +364,22 @@ def runLab(self,j_id,uid, serv):
                         emboss = emboss + [score]
                         status = status + increment
                         count = count + 1
+                        progress_recorder.set_progress(status, 100)
 
                 except:
                     #print e
-                    return  "emboss " + str(sys.exc_info()) + " " + hostname
+                    task_Err.errors+=  "emboss " + str(sys.exc_info()) + " " + hostname + "\n"
+                    task_Err.save()
+                    error_flag=True
+                    raise SoftTimeLimitExceeded()
 
             scores.sort()
             #print scores
 
 
-
+            job.status="SCORING"
+            job.cur_action="Moving numbers around..."
+            job.save()
             toReturn += "gauss: "
             for g in gauss:
                 toReturn += str(g) + ".. "
@@ -361,20 +405,37 @@ def runLab(self,j_id,uid, serv):
                 if score > 110:
                     score = 110
             score = int(score)
-            toReturn +="\nResulting score is " + str(score) + "\n"
+            toReturn+="\nResulting score is " + str(score)
+            job.cur_action = "Resulting score is " + str(score)
+            job.save()
         except:
-            toReturn = "Unexpected error: " + str(sys.exc_info())
-        newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
+            task_Err.errors += "\nUnexpected error: " + str(sys.exc_info())
+            task_Err.save()
+            job.status="ERROR"
+            raise SoftTimeLimitExceeded()
+        newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, result_out = toReturn, time_stamp=job.time_created)
         newAttempt.save()
         task_Err.delete()
         job.deletable=True
-        return toReturn
+        job.save()
+        red.incr('server')
+        progress_recorder.set_progress(100, 100)
+        return "Complete"
     except SoftTimeLimitExceeded:
-        task_Err.save()
+        if error_flag==True:
+            err_block = task_Err.errors
+            task_Err.errors = "A team of flying monkies has been dispatched. When they show up (eventually), show them this log.\n"
+            task_Err+=err_block
+            task_Err.save()
         b.kill()
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
-        print(b.stdout.read())
+        b.wait()
+        if job_not_found==False:
+            job.deletable=True
+            job.save()
+        #print(b.stdout.read())
         serv.inUse=False
         serv.uID=-1
+        red.incr('server')
         return "Task Stopped by user"
