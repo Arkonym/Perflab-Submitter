@@ -140,14 +140,14 @@ def dummyTask(self,j_id, uid):
             else:
                 job.cur_action ="SCORING"
             job.save()
-
-        job.status='COMPLETE'
         score = random.randint(70, 95)
-        job.cur_action += "Score: " + str(score)
+        job.status="COMPLETE: " + str(score)
+
+        job.cur_action = "Score: " + str(score)
         job.save()
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
-        newAttempt.result_out = "Demo score is: " + score
+        newAttempt.result_out = "Demo score is: " + str(score)
         newAttempt.save()
         if job.note_field=='Demo error':
             new_Err= Error(owner=job.owner, from_job_id=job.jid, errors="Sample Error:\nTest Error")
