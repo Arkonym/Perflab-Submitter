@@ -10,6 +10,7 @@ class Command(BaseCommand):
     help = 'Run command to initialize all servers in lease file.'
 
     def _init(self):
+        Server.objects.all().delete()
         Server(ip = '192.168.1.12', hostname = 'rpi2').save()
         Server(ip = '192.168.1.13', hostname = 'rpi3').save()
         Server(ip = '192.168.1.14', hostname = 'rpi4').save()
@@ -33,6 +34,7 @@ class Command(BaseCommand):
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read().decode()
+                print(c)
                 if c == None:
                     serv.online= False
                 else: red.incr('servers')
