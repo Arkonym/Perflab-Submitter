@@ -101,7 +101,7 @@ class Job(models.Model):
 class Error(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     from_job_id = models.PositiveSmallIntegerField()
-    time_stamp = models.DateTimeField(blank=True, null=True, default=None)
+    time_stamp = models.DateTimeField(auto_now_add=True)
     errors = models.TextField(blank=True, null=True, default=None)
 
     # def get_dir(instance):
