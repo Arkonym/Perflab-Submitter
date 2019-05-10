@@ -30,7 +30,7 @@ class Command(BaseCommand):
         try:
             servers = Server.objects.all()
             for serv in servers:
-                a="ping -c 1"+ str(serv.ip) + "| grep \"1 received\""
+                a="ping -c 1 "+ str(serv.ip) + "| grep \"1 received\""
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read().decode()
