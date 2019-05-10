@@ -42,7 +42,7 @@ class Attempt(models.Model):
     time_stamp = models.DateTimeField(blank=True, null=True, default=None)
     score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, default=0)
     result_out = models.TextField(blank=True, null=True, default=None)
-    note_field = models.CharField(max_length=400, blank=True, null=True, default="")
+    note_field = models.TextField(blank=True, null=True, default="")
 
 
     def __str__(self):
@@ -77,7 +77,7 @@ class Job(models.Model):
     status = models.CharField(max_length=10, default="Pending")
     cur_action = models.CharField(max_length=50, default = None, blank=True, null=True)
     deletable = models.BooleanField(default=False)
-    note_field = models.CharField(max_length=400, blank=True, null=True, default="")
+    note_field = models.TextField(blank=True, null=True, default="")
 
     def __str__(self):
         return str(self.owner.id) + " : " + str(self.jid) + " : " + self.time_created.strftime("%Y-%m-%d %H:%M:%S")
