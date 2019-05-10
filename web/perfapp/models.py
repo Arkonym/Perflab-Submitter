@@ -41,6 +41,7 @@ class Attempt(models.Model):
     rel_id = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
     time_stamp = models.DateTimeField(blank=True, null=True, default=None)
     score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, default=0)
+    result_out = models.TextField(blank=True, null=True, default=None)
     note_field = models.CharField(max_length=400, blank=True, null=True, default="")
 
 
@@ -101,7 +102,7 @@ class Error(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     from_job_id = models.PositiveSmallIntegerField()
     time_stamp = models.DateTimeField(blank=True, null=True, default=None)
-    errors = models.CharField(max_length= 500, blank=True, null=True, default=None)
+    errors = models.TextField(blank=True, null=True, default=None)
 
     # def get_dir(instance):
     #     id = instance.owner.id
