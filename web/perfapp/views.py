@@ -77,8 +77,6 @@ def profile(request):
         history = Attempt.objects.filter(owner=user).order_by('-score')[:8]
     except:
         history = None
-    user.profile.max_score = history[0].score
-    user.save()
     try:
         open_jobs = Job.objects.filter(owner=user)
     except:
@@ -269,10 +267,13 @@ def task_status_poll(request, id):
 def task_action_poll(request, id):
     try:
         job = Job.objects.get(owner=request.user, jid=id)
-        if(job.status=='COMPLETE' or job.status=='STOPPED'):
+        cur_action = job.cur_action
+        if cur_action=="END":
             raise()
     except: return HttpResponse('NOT_FOUND')
-    cur_action = job.cur_action
+    if cur_action.split(":")[0] == "Score":
+        job.cur_action = "END"
+        job.save()
     return HttpResponse(cur_action)
 
 def clear_user_queue(request):
@@ -282,7 +283,17 @@ def clear_user_queue(request):
     user_jobs.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
+def clear_all_attempts(request):
+    attempts = Attempt.objects.filter(owner=request.user)
+    attempts.delete()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
+
 def clear_error(request, e_id):
     error = Error.objects.get(owner=request.user, id=e_id)
     error.delete()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def clear_attempt(request, a_id):
+    attempt = Attempt.objects.get(owner=request.user, id=a_id)
+    attempt.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
