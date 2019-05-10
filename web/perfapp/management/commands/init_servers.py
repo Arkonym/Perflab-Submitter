@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read().decode()
-                print(c)
+                #print(c)
                 if c == None:
                     serv.online= False
                 else: red.incr('servers')
