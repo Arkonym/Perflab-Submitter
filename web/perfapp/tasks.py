@@ -166,19 +166,25 @@ def dummyTask(self,j_id, uid):
 def runLab(self,j_id,uid, serv):
     try:
         server = serv.ip
-        owner = User.objects.get(id=uid)
+        user = User.objects.get(id=uid)
         job_not_found=False
+        task_Err = Error(owner=job.owner, from_job_id = j_id)
+        error_flag=False
         try:
             job = Job.objects.get(owner=user, jid=j_id)
             job.status='RUNNING'
             job.hostname = serv.hostname
             job.time_started = datetime.datetime.now()
             job.save()
-        except: raise SoftTimeLimitExceeded()
+        except Job.DoesNotExist:
+            print("Job not found")
+            job_not_found = True
+            task_Err.errors+="Job not found"
+            error_flag=True
+            raise SoftTimeLimitExceeded()
         progress_recorder = ProgressRecorder(self)
-        task_Err = Error(owner=job.owner, from_job_id = job.jid)
+
         toReturn = ""
-        error_flag=False
         try:
             path = "/home/perfserv/uploads/"+str(uid)+"/"+str(j_id)+"/"
 
@@ -294,7 +300,7 @@ def runLab(self,j_id,uid, serv):
                         progress_recorder.set_progress(status, 100)
 
                 except:
-                     task_Err.errors+="Gauss:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                     task_Err.errors+="Gauss:\n " + str(sys.exc_info()) + " " + serv.hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
                      task_Err.save()
                      raise SoftTimeLimitExceeded()
             job.cur_action = "Running Avg"
@@ -318,7 +324,7 @@ def runLab(self,j_id,uid, serv):
                         progress_recorder.set_progress(status, 100)
 
                 except:
-                    task_Err.errors+="Avg:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                    task_Err.errors+="Avg:\n " + str(sys.exc_info()) + " " + serv.hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
                     task_Err.save()
                     raise SoftTimeLimitExceeded()
 
@@ -344,7 +350,7 @@ def runLab(self,j_id,uid, serv):
                         progress_recorder.set_progress(status, 100)
 
                 except:
-                    task_Err.errors+="Hline:\n " + str(sys.exc_info()) + " " + hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
+                    task_Err.errors+="Hline:\n " + str(sys.exc_info()) + " " + serv.hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
                     task_Err.save()
                     error_flag=True
                     raise SoftTimeLimitExceeded()
@@ -372,7 +378,7 @@ def runLab(self,j_id,uid, serv):
 
                 except:
                     #print e
-                    task_Err.errors+=  "emboss " + str(sys.exc_info()) + " " + hostname + "\n"
+                    task_Err.errors+=  "emboss " + str(sys.exc_info()) + " " + serv.hostname + "\n"
                     task_Err.save()
                     error_flag=True
                     raise SoftTimeLimitExceeded()
