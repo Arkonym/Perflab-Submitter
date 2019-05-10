@@ -64,84 +64,21 @@
         </thead>
         <tbody>
           {% for entry in open_jobs %}
-          <tr data-open="Modal-{{entry.id}}">
+          <tr id="row_{{entry.id}}" data-open="Modal-{{entry.id}}">
             <div class="reveal" id="Modal-{{entry.id}}" data-reveal>
             <h4 id="_action_{{entry.id}}">{{entry.cur_action}}</h4>
-            <script>
-              var Row={};
-              $(document).ready(function(){
-                Row['act_int_{{entry.id}}'] = setInterval(poll, 5000);
-                function poll(){
-                    $.get("{% url 'perfapp:action' entry.jid%}", function(data){
-                      Row["last_act_{{entry.id}}"] = data;
-                      console.log(Row['last_act_{{entry.id}}']);
-                      console.log(data);
-                      if(data=='NOT_FOUND'){
-                        clearInterval(Row['act_int_{{entry.id}}']);
-                      }
-                      else if(Row["last_act_{{entry.id}}"]==""){
-                        $('#_action_{{entry.id}}').text(data)
-                      }
-                      else if( Row["last_act_{{entry.id}}"] != data){
-                        $('#_action_{{entry.id}}').append("</br>", data);
-                      }
-
-                    }, 'html');
-                  };
-              });
-            </script>
             <button class="close-button" data-close aria-label="close modal" type="button">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
             <td>{{entry.jid}}</td>
-            <td><p id="_status_{{entry.id}}">{{entry.status}}</p>
-              <script>
-                var Row = {};
-                $(document).ready(function(){
-                  Row['stat_int_{{entry.id}}'] = setInterval(stat_poll, 5000);
-                  function stat_poll(){
-                      $.get("{% url 'perfapp:status' entry.jid%}", function(data){
-                        Row["last_stat_{{entry.id}}"] = data;
-                        console.log(Row['stat_int_{{entry.id}}']);
-                        console.log(data);
-                        if(Row["last_stat_{{entry.id}}"] =='Pending'  && data=='RUNNING'){
-                          window.location.href = "/profile/";
-                        }
-                        if(data == 'NOT_FOUND'){
-                          clearInterval(Row['stat_int_{{entry.id}}']);
-                          // window.location.href = "/profile/";
-                        }
-                        else if (data == 'COMPLETE' || data=='STOPPED'){
-                          $('#_status_{{entry.id}}').text(data);
-                          clearInterval(Row['stat_int_{{entry.id}}']);
-                        }
-                        else{
-                          $('#_status_{{entry.id}}').text(data);
-                        }
-                      }, 'html');
-                    };
-
-                });
-              </script>
-            </td>
+            <td><p id="_status_{{entry.id}}">{{entry.status}}</p></td>
             {% localtime on  %}
             <td>{{entry.time_created}}</td>
             {% endlocaltime %}
             {% if entry.status == 'RUNNING'%}
-            <td>
-              <div class="progress-wrapper">
-                <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
-              </div>
-              <div id="progress-bar-message {{entry.jid}}">Waiting...</div>
-              {%if entry.task_id != None%}
-              <script>
-                var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
-                document.addEventListener("DOMContentLoaded", function () {
-                  CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.jid}}", progressBarMessageId: "progress-bar-message {{entry.jid}}"});
-                });
-              </script>
-              {%endif%}
+            <td id="_prog-bar">
+              {% include "job_frag.html"%}
             </td>
             <td>
               <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
@@ -159,6 +96,53 @@
             {%else%}
             <td>&nbsp&nbsp</td>
             {% endif %}
+            <script>
+              var Row = {};
+              $(document).ready(function(){
+                Row['stat_int_{{entry.id}}'] = setInterval(stat_poll, 5000);
+                function stat_poll(){
+                    $.get("{% url 'perfapp:status' entry.jid%}", function(data){
+                      console.log(Row['stat_int_{{entry.id}}']);
+                      console.log(data);
+                      if(Row["last_stat_{{entry.id}}"] =="Pending"  && data=="RUNNING"){
+                        //$('#_prog_bar').load(window.location.href + " #_prog-bar");
+                         window.location.href = "/profile/";
+                      }
+                      if(data == 'NOT_FOUND'){
+                        clearInterval(Row['stat_int_{{entry.id}}']);
+                        // window.location.href = "/profile/";
+                      }
+                      else if (data == "COMPLETE" || data=="STOPPED"){
+                        $('#_status_{{entry.id}}').text(data);
+                        clearInterval(Row['stat_int_{{entry.id}}']);
+                      }
+                      else{
+                        $('#_status_{{entry.id}}').text(data);
+                      }
+                      Row["last_stat_{{entry.id}}"] = data;
+                    }, 'html');
+                  };
+                Row['act_int_{{entry.id}}'] = setInterval(poll, 5000);
+                function poll(){
+                    $.get("{% url 'perfapp:action' entry.jid%}", function(data){
+                      console.log(Row['last_act_{{entry.id}}']);
+                      console.log(data);
+                      if(data=='NOT_FOUND'){
+                        clearInterval(Row['act_int_{{entry.id}}']);
+                      }
+                      else if(Row["last_act_{{entry.id}}"]==""){
+                        $('#_action_{{entry.id}}').text(data)
+                      }
+                      else if( Row["last_act_{{entry.id}}"] != data){
+                        $('#_action_{{entry.id}}').append("</br>", data);
+                      }
+                      Row["last_act_{{entry.id}}"] = data;
+
+                    }, 'html');
+                  };
+
+              });
+            </script>
           </tr>
           {% endfor %}
         </tbody>

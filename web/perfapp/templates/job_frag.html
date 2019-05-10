@@ -1,2 +1,13 @@
-<h3>Job # {{job.jid}}</h3>
-<h3>Status: {{job.status}}</h3>
+<td id="_prog-bar">
+  <div class="progress-wrapper">
+    <div id="progress-bar {{entry.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+  </div>
+  <div id="progress-bar-message {{entry.jid}}">Waiting...</div>
+  {%if entry.task_id != None%}
+  <script>
+    var progressUrl = "{% url 'celery_progress:task_status' entry.task_id %}";
+    document.addEventListener("DOMContentLoaded", function () {
+      CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.jid}}", progressBarMessageId: "progress-bar-message {{entry.jid}}"});
+    });
+  </script>
+  {%endif%}
