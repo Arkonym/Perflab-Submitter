@@ -74,7 +74,7 @@ def jobDeploy():
                         if pending.exists():
                             try:
                                 cur_job = pending[0]
-                                serv = Server.objects.filter(inUse=False)[0]
+                                serv = Server.objects.filter(online=True, inUse=False)[0]
                                 if serv!=None:
                                     red.decr('servers')
                                     serv.inUse=True
@@ -141,7 +141,7 @@ def dummyTask(self,j_id, uid):
                 job.cur_action ="SCORING"
             job.save()
         score = random.randint(70, 95)
-        job.status="COMPLETE: " + str(score)
+        job.status="COMPLETE \nScore: " + str(score)
 
         job.cur_action = "Score: " + str(score)
         job.save()
