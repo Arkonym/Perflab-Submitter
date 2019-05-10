@@ -88,7 +88,7 @@ def jobDeploy():
                             if cur_job.note_field.split(' ', 1)[0] == "Demo":
                                 task= dummyTask.delay(cur_job.jid, user.id)
                             else:
-                                task = runLab.delay(cur_job.jid, user.id, serv)
+                                task = runLab.delay(cur_job.jid, user.id, serv.id)
                             cur_job.task_id = task.task_id
                             cur_job.save()
                         except:
@@ -163,8 +163,9 @@ def dummyTask(self,j_id, uid):
         return 'task aborted'
 
 @shared_task(bind=True)
-def runLab(self,j_id,uid, serv):
+def runLab(self,j_id,uid, serv_id):
     try:
+        serv = Server.objects.get(id=serv_id)
         server = serv.ip
         user = User.objects.get(id=uid)
         job_not_found=False
@@ -430,7 +431,7 @@ def runLab(self,j_id,uid, serv):
         job.save()
         red.incr('server')
         progress_recorder.set_progress(100, 100)
-        return "Complete"
+        return "runLab Completed successfully"
     except SoftTimeLimitExceeded:
         if error_flag==True:
             err_block = task_Err.errors
@@ -448,4 +449,7 @@ def runLab(self,j_id,uid, serv):
         serv.inUse=False
         serv.uID=-1
         red.incr('server')
-        return "Task Stopped by user"
+        if error_flag:
+            return "Task failed with errors"
+        else:
+            return "Task Stopped by user"
