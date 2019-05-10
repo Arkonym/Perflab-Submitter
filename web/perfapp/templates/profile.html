@@ -73,7 +73,8 @@
                 Row['act_int_{{entry.id}}'] = setInterval(poll, 5000);
                 function poll(){
                     $.get("{% url 'perfapp:action' entry.jid%}", function(data){
-                      console.log(Row['act_int_{{entry.id}}']);
+                      Row["last_act_{{entry.id}}"] = data;
+                      console.log(Row['last_act_{{entry.id}}']);
                       console.log(data);
                       if(data=='NOT_FOUND'){
                         clearInterval(Row['act_int_{{entry.id}}']);
@@ -82,9 +83,9 @@
                         $('#_action_{{entry.id}}').text(data)
                       }
                       else if( Row["last_act_{{entry.id}}"] != data){
-                        $('#_action_{{entry.id}}').append("</br>",data);
+                        $('#_action_{{entry.id}}').append("</br>", data);
                       }
-                      Row["last_act_{{entry.id}}"] = data;
+
                     }, 'html');
                   };
               });
@@ -101,13 +102,15 @@
                   Row['stat_int_{{entry.id}}'] = setInterval(stat_poll, 5000);
                   function stat_poll(){
                       $.get("{% url 'perfapp:status' entry.jid%}", function(data){
+                        Row["last_stat_{{entry.id}}"] = data;
                         console.log(Row['stat_int_{{entry.id}}']);
                         console.log(data);
                         if(Row["last_stat_{{entry.id}}"] =='Pending'  && data=='RUNNING'){
                           window.location.href = "/profile/";
                         }
                         if(data == 'NOT_FOUND'){
-                          window.location.href = "/profile/";
+                          clearInterval(Row['stat_int_{{entry.id}}']);
+                          // window.location.href = "/profile/";
                         }
                         else if (data == 'COMPLETE' || data=='STOPPED'){
                           $('#_status_{{entry.id}}').text(data);
@@ -116,7 +119,6 @@
                         else{
                           $('#_status_{{entry.id}}').text(data);
                         }
-                        Row["last_stat_{{entry.id}}"] = data;
                       }, 'html');
                     };
 
