@@ -59,36 +59,40 @@ def cleanup():
 @shared_task
 def jobDeploy():
     ###REMOVE THIS BIT###
-    red.set('servers', 0)
+    #red.set('servers', 0)
     print("Servers avail: " + red.get('servers').decode())
     if int(red.get('servers')) > 0:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                if jobs.exists():
-                    running = jobs.filter(status='RUNNING')
-                    if running.exists():
-                        continue
-                    else:
-                        pending = jobs.filter(status='PENDING')
-                        if pending.exists():
-                            try:
-                                cur_job = pending[0]
-                                serv = Server.objects.filter(online=True, inUse=False)[0]
-                                if serv!=None:
-                                    red.decr('servers')
-                                    serv.inUse=True
-                                    serv.uID=request.user.id
-                                    serv.save()
-                                else: raise ValueError("No server avail")
-                                if cur_job.note_field.split(' ', 1)[0] == "Demo":
-                                    task= dummyTask.delay(cur_jod.jid, user.id)
-                                else:task = runLab.delay(cur_job.jid, user.id, serv)
-                                cur_job.task_id = task.task_id
-                                cur_job.save()
-                                break;
-                            except:
-                                continue
+                running = jobs.filter(status='RUNNING')
+                if running.exists():
+                    continue
+                else:
+                    pending = jobs.filter(status='Pending')
+                    print(pending)
+                    if pending.exists():
+                        try:
+                            cur_job = pending[0]
+                            print(cur_job)
+                            serv = Server.objects.filter(online=True, inUse=False)[0]
+                            print(serv)
+                            if serv!=None:
+                                print("Server not none")
+                                red.decr('servers')
+                                serv.inUse=True
+                                serv.uID=user.id
+                                serv.save()
+                            else:
+                                raise ValueError("No server avail")
+                            if cur_job.note_field.split(' ', 1)[0] == "Demo":
+                                task= dummyTask.delay(cur_job.jid, user.id)
+                            else:
+                                task = runLab.delay(cur_job.jid, user.id, serv)
+                            cur_job.task_id = task.task_id
+                            cur_job.save()
+                        except:
+                            continue
     else:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
