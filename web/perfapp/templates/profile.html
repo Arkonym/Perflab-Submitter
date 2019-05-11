@@ -44,10 +44,10 @@
             <td>&nbsp</td>
             <td>{{entry.time_stamp}}</td>
             <div class="dropdown-pane" id="att_drop_{{entry.id}}" data-dropdown data-hover="true" data-hover-pane="true">
-              {{entry.result_out}}
+              {{entry.result_out|linebreaksbr}}
               {% if entry.notefield != None%}
               </br>
-              {{entry.notefield}}
+              {{entry.notefield|linebreaksbr}}
               {%endif%}
               </br></br>
               <form action="{% url 'perfapp:Delete_Att' entry.id %}" method="post">
@@ -196,7 +196,7 @@
           <div class="reveal" id="Modal-{{err.id}}" data-reveal>
             <h4>Errors for job# {{err.from_job_id}}</h4>
             <p>
-              {{err.errors}}
+              {{err.errors|linebreaks}}
               </p>
             <button class="close-button" data-close aria-label="close modal" type="button">
               <span aria-hidden="true">&times;</span>
