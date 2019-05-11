@@ -21,7 +21,7 @@ services:
     build:
       context: ./web
       dockerfile: CeleryDockerfile
-    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && ssh-agent bash && ssh-add /home/perfserv/.ssh/id_rsa &&celery -A perfproject worker -l info"
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv &&celery -A perfproject worker -l info"
     links:
       - redis
     volumes:
@@ -35,7 +35,7 @@ services:
     build:
       context: ./web
       dockerfile: CeleryDockerfile
-    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && ssh-agent bash && ssh-add /home/perfserv/.ssh/id_rsa && celery -A perfproject beat -l info"
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && celery -A perfproject beat -l info"
     links:
       - redis
     volumes:

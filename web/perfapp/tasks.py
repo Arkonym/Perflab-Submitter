@@ -198,7 +198,7 @@ def runLab(self,j_id,uid, serv_id):
             job.cur_action = "Setting Up"
             job.save()
 
-            a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"rm -rf perflab-setup\""
+            a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"rm -rf perflab-setup\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read()
@@ -210,7 +210,7 @@ def runLab(self,j_id,uid, serv_id):
                 raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(2, 100)
 
-            a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cp -rf perflab-files perflab-setup\""
+            a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cp -rf perflab-files perflab-setup\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read()
@@ -226,7 +226,7 @@ def runLab(self,j_id,uid, serv_id):
                     task_Err.save()
                     error_flag=True
             if error_flag==False:
-                a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+"FilterMain.cpp perfuser@"+server+":~/perflab-setup/"
+                a="scp -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+"FilterMain.cpp perfuser@"+server+":~/perflab-setup/"
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read()
@@ -248,7 +248,7 @@ def runLab(self,j_id,uid, serv_id):
                             task_Err.save()
                             error_flag=True
                     if error==False:
-                        a="scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+str(line[0])+" perfuser@"+server+":~/perflab-setup/"
+                        a="scp -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+str(line[0])+" perfuser@"+server+":~/perflab-setup/"
                         print (a)
                         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                         b.wait()
@@ -262,7 +262,7 @@ def runLab(self,j_id,uid, serv_id):
             job.cur_action = "Compiling..."
             job.save()
 
-            a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; make filter\""
+            a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; make filter\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read()
@@ -292,7 +292,7 @@ def runLab(self,j_id,uid, serv_id):
             gauss = []
             count = 0
             while count < tests:
-                a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./gauss.sh\""
+                a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./gauss.sh\""
                 print (a)
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
@@ -319,7 +319,7 @@ def runLab(self,j_id,uid, serv_id):
             count = 0
             avg = []
             while count < tests:
-                a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./avg.sh\""
+                a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./avg.sh\""
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read()
@@ -344,7 +344,7 @@ def runLab(self,j_id,uid, serv_id):
             count = 0
             hline = []
             while count < tests:
-                a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./hline.sh\""
+                a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./hline.sh\""
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read()
@@ -370,7 +370,7 @@ def runLab(self,j_id,uid, serv_id):
             count = 0
             emboss = []
             while count < tests:
-                a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./emboss.sh\""
+                a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; ./emboss.sh\""
                 b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
                 b.wait()
                 c = b.stdout.read().decode()
