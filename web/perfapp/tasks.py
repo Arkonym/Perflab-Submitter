@@ -193,7 +193,7 @@ def runLab(self,j_id,uid, serv_id):
             path = "/home/perfserv/uploads/"+str(uid)+"/"+str(j_id)+"/"
 
             #print path
-            config = open("/home" +job.config.path,"r")
+            config = open(path+"/config.txt","r")
             progress_recorder.set_progress(1, 100)
             job.cur_action = "Setting Up"
             job.save()
