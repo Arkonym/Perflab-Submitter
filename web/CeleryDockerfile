@@ -11,8 +11,9 @@ RUN chown perfserv:perfserv -R /home/perfserv/
 ADD id_rsa.pub /home/perfserv/.ssh/id_rsa.pub
 ADD id_rsa /home/perfserv/.ssh/id_rsa
 RUN chown perfserv:perfserv -R /home/perfserv/.ssh
-#ADD . /home/perfserv/code
 RUN chown perfserv:perfserv -R /home/perfserv
 #RUN chown perfserv:perfserv -R /home/perfserv/uploads
 #WORKDIR /home/perfserv/code
 RUN chmod 400 /home/perfserv/.ssh/id_rsa
+RUN ssh-agent bash
+RUN ssh-add /home/perfserv/.ssh/id_rsa
