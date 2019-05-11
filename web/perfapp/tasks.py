@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 
 from time import sleep
 import datetime
+import math
 ##TEMP IMPORT FOR EXPO##
 import random
 
@@ -178,6 +179,7 @@ def runLab(self,j_id,uid, serv_id):
             job = Job.objects.get(owner=user, jid=j_id)
             job.status='RUNNING'
             job.hostname = serv.hostname
+            job.task_id = self.request.id
             job.time_started = datetime.datetime.now()
             job.save()
         except Job.DoesNotExist:
@@ -242,7 +244,7 @@ def runLab(self,j_id,uid, serv_id):
                             task_Err.errors+=(line[0] + ": illegal unistd\n")
                             task_Err.save()
                             error_flag=True
-                    if error==False:
+                    if error_flag==False:
                         a="scp -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "+path+str(line[0])+" perfuser@"+server+":~/perflab-setup/"
                         print (a)
                         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -395,23 +397,29 @@ def runLab(self,j_id,uid, serv_id):
             job.status="SCORING"
             job.cur_action="Moving numbers around..."
             job.save()
-            toReturn += "gauss: "
+            toReturn += "gauss:\n"
             for g in gauss:
-                toReturn += str(g) + ".. "
-            toReturn += "\navg: "
+                toReturn += str(g) + "..\n "
+            toReturn += "\navg:\n"
             for a in avg:
-                toReturn += str(a) + ".. "
-            toReturn += "\nhline: "
+                toReturn += str(a) + "..\n "
+            toReturn += "\nhline:\n"
             for h in hline:
-                toReturn += str(h) + ".. "
-            toReturn += "\nemboss: "
+                toReturn += str(h) + "..\n "
+            toReturn += "\nemboss:\n"
             for e in emboss:
-                toReturn += str(e) + ".. "
-            toReturn += "\nScores are "
+                toReturn += str(e) + "..\n "
+            toReturn += "\nScores are:\n"
+            count = 0
             for s in scores:
-                toReturn += str(int(s)) + " "
+                if count < 4:
+                    toReturn += str(int(s)) + " "
+                    count+=1
+                else:
+                    toReturn += str(int(s)) + "\n"
+                    count = 0
             cpe = scores[int((len(scores)+1)/2)]
-            toReturn += "\nmedian CPE is " + str(int(cpe)) + " "
+            toReturn += "\nmedian CPE is " + str(int(cpe)) + "\n"
             if cpe > 4000:
                 score = 0
             else:
@@ -421,16 +429,18 @@ def runLab(self,j_id,uid, serv_id):
                     score = 110
             score = int(score)
             toReturn+="\nResulting score is " + str(score)
-            job.cur_action = "Resulting score is " + str(score)
+            job.status="COMPLETE \nScore: " + str(score)
+            job.cur_action = "Score:" + str(score)
             job.save()
         except:
             task_Err.errors += "\nUnexpected error: " + str(sys.exc_info())
             task_Err.save()
-            job.status="ERROR"
+            error_flag=True
             raise SoftTimeLimitExceeded()
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, result_out = toReturn, time_stamp=job.time_created)
         newAttempt.save()
-        task_Err.delete()
+        if task_Err.id!=None:
+            task_Err.delete()
         job.deletable=True
         job.save()
         red.incr('server')
@@ -442,6 +452,9 @@ def runLab(self,j_id,uid, serv_id):
             task_Err.errors = "A team of flying monkies has been dispatched. When they show up (eventually), show them this log.\n"
             task_Err.errors+=err_block
             task_Err.save()
+            job.cur_action= "ERROR"
+            job.status= "ERROR"
+            job.save()
         if b!=None:
             b.kill()
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
