@@ -445,7 +445,7 @@ def runLab(self,j_id,uid, serv_id):
         if error_flag==True:
             err_block = task_Err.errors
             task_Err.errors = "A team of flying monkies has been dispatched. When they show up (eventually), show them this log.\n"
-            task_Err+=err_block
+            task_Err.errors+=err_block
             task_Err.save()
         if b!=None:
             b.kill()
