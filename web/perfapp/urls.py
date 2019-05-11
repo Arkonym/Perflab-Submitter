@@ -19,6 +19,7 @@ urlpatterns = [
     path('<int:a_id>/delete_att/', views.clear_attempt, name='Delete_Att'),
     path('clear_att/', views.clear_all_attempts, name="Clear_All_Att"),
     path('clear_q/', views.clear_user_queue),
+    path('clear_err/', views.clear_all_errs, name="Clear_All_Errs"),
     path('task_poll/stat/<int:id>', views.task_status_poll, name='status'),
     path('task_poll/act/<int:id>', views.task_action_poll, name='action')
 ]

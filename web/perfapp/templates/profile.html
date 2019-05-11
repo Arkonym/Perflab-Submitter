@@ -16,7 +16,13 @@
   <div class="grid-x grid-padding-x align-center">
     <div class="cell medium-8">
     <h4>User #: {{user.id}}</h4>
-    </div>
+    {% if history != None%}
+    <form action="{% url 'perfapp:Clear_All_Att'%}" method="post">
+    {% csrf_token %}
+    <input type="Submit" class="hollow button alert" value="Clear All Attempts" onclick="return confirm('Are you sure? This cannot be undone.')" />
+    </form>
+    {% endif%}
+  </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
     <div class="cell medium-8">
@@ -29,12 +35,6 @@
             <th>&nbsp;</th>
             <th>Date</th>
           </tr>
-          <div class="dropdown-pane" data-position="top left" id="_attempts_table" data-dropdown data-close-on-click="true">
-            <form action="{% url 'perfapp:Clear_All_Att'%}" method="post">
-            {% csrf_token %}
-            <input type="Submit" class="button alert" value="Clear All Attempts" onclick="return confirm('Are you sure? This cannot be undone.')" />
-          </form>
-            </div>
         </thead>
         <tbody>
           {% for entry in history %}
@@ -179,9 +179,20 @@
     </div>
   </div>
   <div class="grid-x grid-padding-x align-center">
-    <div class="cell">&nbsp</div>
     <div class="cell medium-8">
-      <h4> Error Reports </h4>
+      <div style="display:inline;">
+         <h4> Error Reports</h4>
+         {% if errors != None %}
+         <form action="{% url 'perfapp:Clear_All_Errs'%}" method="post">
+           {% csrf_token %}
+           <input type="Submit" class="hollow button alert" value="Clear All Errors" onclick="return confirm('Are you sure? This cannot be undone.')" />
+         </form>
+         {%endif%}
+    </div>
+    </div>
+  </div>
+  <div class="grid-x grid-padding-x align-center">
+    <div class="cell medium-8">
       <table class="hover">
         <thead>
           <tr>

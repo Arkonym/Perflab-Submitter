@@ -75,6 +75,8 @@ def profile(request):
     user = request.user
     try:
         history = Attempt.objects.filter(owner=user).order_by('-score')[:8]
+        if not history.exists():
+            history=None
     except:
         history = None
     try:
@@ -83,6 +85,8 @@ def profile(request):
         open_jobs = None
     try:
         logged_errors = Error.objects.filter(owner=user)
+        if not logged_errors.exists():
+            logged_errors = None
     except:
         logged_errors = None
     context={
@@ -286,6 +290,11 @@ def clear_user_queue(request):
 def clear_all_attempts(request):
     attempts = Attempt.objects.filter(owner=request.user)
     attempts.delete()
+    return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def clear_all_errs(request):
+    Errors = Error.objects.filter(owner=request.user)
+    Errors.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
 def clear_error(request, e_id):
