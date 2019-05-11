@@ -203,11 +203,6 @@ def runLab(self,j_id,uid, serv_id):
             b.wait()
             c = b.stdout.read()
             e = b.stderr.read().decode()
-            if len(e)>0:
-                error_flag=True
-                task_Err.errors+="Remove old perflab error:\n" + e + "\n"
-                task_Err.save()
-                raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(2, 100)
 
             a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cp -rf perflab-files perflab-setup\""
