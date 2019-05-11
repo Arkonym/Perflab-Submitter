@@ -88,10 +88,12 @@ def jobDeploy():
                             if cur_job.note_field.split(' ', 1)[0] == "Demo":
                                 task= dummyTask.delay(cur_job.jid, user.id)
                             else:
+                                print("runLab sent")
                                 task = runLab.delay(cur_job.jid, user.id, serv.id)
                             cur_job.task_id = task.task_id
                             cur_job.save()
-                        except:
+                        except Exception as e:
+                            print(e)
                             continue
     else:
         for user in User.objects.all():
@@ -169,8 +171,9 @@ def runLab(self,j_id,uid, serv_id):
         server = serv.ip
         user = User.objects.get(id=uid)
         job_not_found=False
-        task_Err = Error(owner=user, from_job_id = j_id)
+        task_Err = Error(owner=user, from_job_id = j_id, errors="")
         error_flag=False
+        b=None
         try:
             job = Job.objects.get(owner=user, jid=j_id)
             job.status='RUNNING'
@@ -438,7 +441,8 @@ def runLab(self,j_id,uid, serv_id):
             task_Err.errors = "A team of flying monkies has been dispatched. When they show up (eventually), show them this log.\n"
             task_Err+=err_block
             task_Err.save()
-        b.kill()
+        if b!=None:
+            b.kill()
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
         b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
         b.wait()
@@ -453,3 +457,5 @@ def runLab(self,j_id,uid, serv_id):
             return "Task failed with errors"
         else:
             return "Task Stopped by user"
+    except Exception as e:
+        print(e)
