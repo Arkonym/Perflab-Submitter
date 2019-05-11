@@ -70,15 +70,15 @@ def jobDeploy():
                     continue
                 else:
                     pending = jobs.filter(status='Pending')
-                    print(pending)
+                    #print(pending)
                     if pending.exists():
                         try:
                             cur_job = pending[0]
-                            print(cur_job)
+                            #print(cur_job)
                             serv = Server.objects.filter(online=True, inUse=False)[0]
-                            print(serv)
+                            #print(serv)
                             if serv!=None:
-                                print("Server not none")
+                                #print("Server not none")
                                 red.decr('servers')
                                 serv.inUse=True
                                 serv.uID=user.id
@@ -88,7 +88,7 @@ def jobDeploy():
                             if cur_job.note_field.split(' ', 1)[0] == "Demo":
                                 task= dummyTask.delay(cur_job.jid, user.id)
                             else:
-                                print("runLab sent")
+                                #print("runLab sent")
                                 task = runLab.delay(cur_job.jid, user.id, serv.id)
                             cur_job.task_id = task.task_id
                             cur_job.save()
@@ -202,6 +202,12 @@ def runLab(self,j_id,uid, serv_id):
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
             b.wait()
             c = b.stdout.read()
+            e = b.stderr.read().decode()
+            if len(e)>0:
+                error_flag=True
+                task_err.errors+="Remove old perflab error:\n" + e + "\n"
+                task_err.save()
+                raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(2, 100)
 
             a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cp -rf perflab-files perflab-setup\""
@@ -454,6 +460,7 @@ def runLab(self,j_id,uid, serv_id):
         serv.uID=-1
         red.incr('server')
         if error_flag:
+            self.update_state(state='FAILURE')
             return "Task failed with errors"
         else:
             return "Task Stopped by user"
