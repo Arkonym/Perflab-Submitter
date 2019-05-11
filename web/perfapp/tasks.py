@@ -205,8 +205,8 @@ def runLab(self,j_id,uid, serv_id):
             e = b.stderr.read().decode()
             if len(e)>0:
                 error_flag=True
-                task_err.errors+="Remove old perflab error:\n" + e + "\n"
-                task_err.save()
+                task_Err.errors+="Remove old perflab error:\n" + e + "\n"
+                task_Err.save()
                 raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(2, 100)
 
