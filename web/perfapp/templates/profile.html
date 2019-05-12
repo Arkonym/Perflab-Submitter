@@ -82,38 +82,43 @@
         </thead>
         <tbody>
           {% for entry in open_jobs %}
-          <tr id="row_{{entry.id}}" data-open="Modal-{{entry.id}}">
-            <div class="reveal" id="Modal-{{entry.id}}" data-reveal>
-            <h4 id="_action_{{entry.id}}">{{entry.cur_action}}</h4>
+          <tr id="row_{{entry.object.id}}" data-open="Modal-{{entry.object.id}}">
+            <div class="reveal" id="Modal-{{entry.object.id}}" data-reveal>
+            <h4 id="_action_{{entry.object.id}}">{{entry.object.cur_action}}</h4>
             <button class="close-button" data-close aria-label="close modal" type="button">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-            <td>{{entry.jid}}</td>
-            <td><p id="_status_{{entry.id}}">{{entry.status}}</p></td>
+            <td>{{entry.object.jid}}</td>
+            <td><p id="_status_{{entry.object.id}}">{{entry.object.status}}</p></td>
             {% localtime on  %}
-            <td>{{entry.time_created}}</td>
+            <td>{{entry.object.time_created}}</td>
             {% endlocaltime %}
-            {% if entry.status == 'RUNNING'%}
-            <td id="_prog-bar">
-              {% include "job_frag.html"%}
-            </td>
+            {% if entry.object.status == 'RUNNING'%}
             <td>
-              <form action="{% url 'perfapp:Stop' entry.jid %}" method="post">
+              <div id="_prog_wrapper" class="progress-wrapper" style="display:none">
+                <div id="progress-bar {{entry.object.jid}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+              </div>
+              <div id="progress-bar-message {{entry.object.jid}}">Waiting...</div>
+            </td>
+
+            <td>
+              <div id="_action_button">
+              <form action="{% url 'perfapp:Stop' entry.object.jid %}" method="post">
                 {% csrf_token %}
                 <input type="Submit" class="button alert" value="Stop" />
               </form>
             </td>
-            {%elif entry.status == 'Pending'%}
+            {%elif entry.object.status == 'Pending' or entry.object.status == 'In Queue'%}
             <td>
-              <form action="{% url 'perfapp:Cancel' entry.jid %}" method="post">
+              <form action="{% url 'perfapp:Cancel' entry.object.jid %}" method="post">
                 {% csrf_token %}
                 <input type="Submit" class="button warning" value="Cancel" />
               </form>
             </td>
-            {%elif entry.status == 'ERROR'%}
+            {%elif entry.object.status == 'ERROR'%}
             <td>
-              <form action="{% url 'perfapp:Cancel' entry.jid %}" method="post">
+              <form action="{% url 'perfapp:Cancel' entry.object.jid %}" method="post">
                 {% csrf_token %}
                 <input type="Submit" class="button secondary" value="Clear" />
               </form>
@@ -123,55 +128,47 @@
             {% endif %}
             <script>
               var Row = {};
-              $(document).ready(function(){
-                Row['stat_int_{{entry.id}}'] = setInterval(stat_poll, 5000);
-                function stat_poll(){
-                    $.get("{% url 'perfapp:status' entry.jid%}", function(data){
-                      console.log(Row['stat_int_{{entry.id}}']);
-                      console.log(data);
-                      var stat = data.split(" ")[0];
-                      var new_stat = data;
-                      //.replace("\n", '</br>')
-                      if(Row["last_stat_{{entry.id}}"] =="Pending"  && data=="RUNNING"){
-                        //$('#_prog_bar').load(location.href + " #_prog-bar");
-                         window.location.href = "/profile/";
-                      }
-                      if(stat == 'NOT_FOUND'){
-                        clearInterval(Row['stat_int_{{entry.id}}']);
-                        // window.location.href = "/profile/";
-                      }
-                      else if (stat == "COMPLETE" || stat=="STOPPED"){
-                        $('#_status_{{entry.id}}').text(new_stat);
-                        clearInterval(Row['stat_int_{{entry.id}}']);
-                      }
-                      else{
-                        $('#_status_{{entry.id}}').text(new_stat);
-                      }
-                      Row["last_stat_{{entry.id}}"] = stat;
-                    }, 'html');
-                  };
-                Row['act_int_{{entry.id}}'] = setInterval(poll, 5000);
-                function poll(){
-                    $.get("{% url 'perfapp:action' entry.jid%}", function(data){
-                      console.log(Row['last_act_{{entry.id}}']);
-                      console.log(data);
+              var job_group = "{{entry.json.id}}";
+              var taskSocket = new WebSocket(
+                'ws://'+ window.location.host +
+                '/ws/task/' + job_group + '/'
+                );
+              Row["last_stat_{{entry.id}}"] = {{entry.json.status}}
+              Row["last_act_{{entry.object.id}}"] = {{entry.json.cur_action}}
+              taskSocket.onmessage = function(e){
+                var data = JSON.parse(e.data);
+                var status = data['status'];
+                var action = data['action'];
+                var task_id = data['task_id'];
+                console.log(status);
+                console.log(action);
+                console.log(task_id);
 
-                      if(data=='NOT_FOUND'){
-                        clearInterval(Row['act_int_{{entry.id}}']);
-                      }
-                      else if(Row["last_act_{{entry.id}}"]==""){
-                        $('#_action_{{entry.id}}').text(data)
-                      }
-                      else if( Row["last_act_{{entry.id}}"] != data){
-                        $('#_action_{{entry.id}}').append("</br>", data);
-                      }
-                      Row["last_act_{{entry.id}}"] = data;
-
-                    }, 'html');
-                  };
-
-              });
+                if( Row["last_act_{{entry.object.id}}"] != action){
+                  $('#_action_{{entry.object.id}}').append("</br>", action);
+                }
+                Row["last_act_{{entry.object.id}}"] = action;
+                if (status == 'ERROR'){
+                  window.location.href = "/profile/";
+                }
+                if((Row["last_stat_{{entry.id}}"] ==null)  && status=="RUNNING"){
+                  $('#_prog_wrapper').show();
+                  var progressUrl = "{% url 'celery_progress:task_status'  entry.object.task_id%}";
+                  document.addEventListener("DOMContentLoaded", function () {
+                    CeleryProgressBar.initProgressBar(progressUrl, {progressBarId: "progress-bar {{entry.object.jid}}", progressBarMessageId: "progress-bar-message {{entry.object.jid}}"});
+                  });
+                }
+                else if (Row["last_stat_{{entry.object.id}}"]!=status){
+                $('#_status_{{entry.object.id}}').text(status);
+                }
+                Row["last_stat_{{entry.object.id}}"] = status;
+              };
             </script>
+            {%if entry.object.task_id != None%}
+            <script>
+
+            </script>
+            {% endif %}
           </tr>
           {% endfor %}
         </tbody>
@@ -231,4 +228,22 @@
 </div>
 {% endblock %}
 {% block script%}
+<script>
+  var Row = {};
+  var job_group = 50;
+  var taskSocket = new WebSocket(
+    'ws://'+ window.location.host +
+    '/ws/task/' + job_group + '/'
+    );
+  console.log(window.location.host)
+  taskSocket.onmessage = function(e){
+    var data = JSON.parse(e.data);
+    var status = data['status'];
+    var action = data['action'];
+    var task_id = data['task_id'];
+    console.log(status);
+    console.log(action);
+    console.log(task_id);
+  };
+    </script>
 {% endblock %}

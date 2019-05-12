@@ -10,6 +10,9 @@ from django.template.loader import get_template, render_to_string
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
+from django.forms.models import model_to_dict
+import json
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -31,7 +34,8 @@ from perfapp.tasks import *
 from perfapp.models import *
 from perfapp.tables import ScoreTable
 
-
+from channels.layers import get_channel_layer
+from asgiref.sync import AsyncToSync as AtoS
 
 
 def get_client_ip(request):
@@ -52,6 +56,8 @@ def handle_upload(job, f, f_name, j_path):
         with open(path, 'w+') as dest:
             dest.write(f.read())
     dest.close()
+
+
 
 
 
@@ -83,6 +89,13 @@ def profile(request):
         open_jobs = Job.objects.filter(owner=user)
     except:
         open_jobs = None
+
+    jobs = []
+    for j in open_jobs:
+        layer = get_channel_layer()
+        msg = {'type': 'task_message', 'status': j.status, 'action': j.cur_action, 'task_id': j.task_id}
+        AtoS(layer.group_send)(str(j.id), msg)
+        jobs.append({"object": model_to_dict(j, fields=[field.name for field in j._meta.fields]), "json":{'id': mark_safe(json.dumps(j.id)), 'status':mark_safe(json.dumps(j.status)), 'cur_action': mark_safe(json.dumps(j.cur_action))}})
     try:
         logged_errors = Error.objects.filter(owner=user)
         if not logged_errors.exists():
@@ -94,7 +107,7 @@ def profile(request):
         "user":user,
         "max_score": user.profile.max_score,
         "history": history,
-        "open_jobs":open_jobs,
+        "open_jobs":jobs,
         "errors": logged_errors
     }
     return render(request, "profile.html", context=context)
@@ -102,7 +115,7 @@ def profile(request):
 
 @login_required(redirect_field_name='/', login_url="/login/")
 def update_profile(request):
-    user = request.user
+    pass
 
 def logout_view(request):
     logout(request)
@@ -124,10 +137,6 @@ def register(request):
 
 @login_required(redirect_field_name='/', login_url='/login/')
 def submitted(request, j_id):
-    # task = placeholder.delay()
-    # job = Job.objects.filter(owner=request.user, jid = j_id)
-    # job.task_id = task.task_id
-    # print(task_id)
     context={
     "title":"Success",
     "job_id":j_id
@@ -262,23 +271,6 @@ def cancel_job(request, j_id):
     job.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
 
-def task_status_poll(request, id):
-    try:
-        status = Job.objects.get(owner=request.user, jid=id).status
-    except: return HttpResponse('NOT_FOUND')
-    return HttpResponse(status)
-
-def task_action_poll(request, id):
-    try:
-        job = Job.objects.get(owner=request.user, jid=id)
-        cur_action = job.cur_action
-        if cur_action=="END":
-            raise()
-    except: return HttpResponse('NOT_FOUND')
-    if cur_action.split(":")[0] == "Score":
-        job.cur_action = "END"
-        job.save()
-    return HttpResponse(cur_action)
 
 def clear_user_queue(request):
     user_jobs = Job.objects.filter(owner=request.user)
@@ -306,3 +298,9 @@ def clear_attempt(request, a_id):
     attempt = Attempt.objects.get(owner=request.user, id=a_id)
     attempt.delete()
     return HttpResponseRedirect(reverse('perfapp:Profile'))
+
+def stop_frag(request, j_id):
+    return render(request, "stop_button.html", {'j_id': j_id})
+
+def clear_frag(request, j_id):
+    return render(request, "clear_err_button.html", {'j_id': j_id})
