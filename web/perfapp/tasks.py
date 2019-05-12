@@ -11,12 +11,16 @@ from celery.signals import worker_ready
 from celery_progress.backend import ProgressRecorder
 from perfapp.models import Job, Attempt, Server, Error
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from time import sleep
 import datetime
 import math
 ##TEMP IMPORT FOR EXPO##
 import random
+
+from channels.layers import get_channel_layer
+from asgiref.sync import AsyncToSync as AtoS
 
 
 from subprocess import Popen, PIPE
@@ -59,14 +63,13 @@ def cleanup():
     return "cleanup complete"
 @shared_task
 def jobDeploy():
-    ###REMOVE THIS BIT###
-    #red.set('servers', 0)
+    layer = get_channel_layer()
     print("Servers avail: " + red.get('servers').decode())
     if int(red.get('servers')) > 0:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                running = jobs.filter(status='RUNNING')
+                running = jobs.filter(Q(status='RUNNING') | Q(status='SCORING') | Q(status='In Queue'))
                 if running.exists():
                     continue
                 else:
@@ -91,6 +94,9 @@ def jobDeploy():
                             else:
                                 #print("runLab sent")
                                 task = runLab.delay(cur_job.jid, user.id, serv.id)
+                            msg = {'type': 'task_message', 'status': 'In Queue', 'action': 'Waiting', 'task_id': task.task_id}
+                            AtoS(layer.group_send)(str(job_id), msg)
+                            cur_job.status = "In Queue"
                             cur_job.task_id = task.task_id
                             cur_job.save()
                         except Exception as e:
@@ -112,25 +118,23 @@ def jobDeploy():
                         print(task.task_id)
                         cur_job.save()
     return "Deploy complete"
-@shared_task(bind=True)
-def placeholder(self):
-    ph_recorder = ProgressRecorder(self)
-    flag=True
-    while(flag!=False):
-        try:
-            pass
-        except SoftTimeLimitExceeded:
-            flag=False
+
+
 
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
     progress_recorder = ProgressRecorder(self)
+    layer = get_channel_layer()
     try:
         user = User.objects.get(id=uid)
         try:
             job = Job.objects.get(owner=user, jid=j_id)
         except Job.DoesNotExist:
             return 'no matching job'
+        task_id = self.request.id
+        msg = {'type': 'task_message', 'status': 'RUNNING', 'action':'setting up', 'task_id': task_id}
+        print("Sending message on channel " + str(job.id))
+        AtoS(layer.group_send)(str(job.id), msg)
         job.status='RUNNING'
         job.time_started = datetime.datetime.now()
         job.save()
@@ -139,19 +143,25 @@ def dummyTask(self,j_id, uid):
             sleep(1)
             progress_recorder.set_progress(i+1, 100)
             if i<10:
-                job.cur_action ="Setting Up..."
+                msg['action'] ="Setting Up..."
             elif i<=20:
-                job.cur_action ="Compiling..."
+                msg['action'] ="Compiling..."
             elif i<90:
-                job.cur_action ="Running"
+                msg['action'] ="Running"
             else:
-                job.cur_action ="SCORING"
-            job.save()
-        score = random.randint(70, 95)
-        job.status="COMPLETE \nScore: " + str(score)
+                msg['action'] ="SCORING"
+            AtoS(layer.group_send)(str(job.id), msg)
 
+        score = random.randint(70, 95)
+
+        job.status="COMPLETE \nScore: " + str(score)
         job.cur_action = "Score: " + str(score)
         job.save()
+
+        msg['action'] = "Score: " + str(score)
+        msg['status'] = "COMPLETE \nScore: " + str(score)
+        AtoS(layer.group_send)(str(job.id), msg)
+
         progress_recorder.set_progress(100,100)
         newAttempt = Attempt(owner=user, note_field=job.note_field, score=score, time_stamp=job.time_created)
         newAttempt.result_out = "Demo score is: " + str(score)
@@ -164,6 +174,8 @@ def dummyTask(self,j_id, uid):
         return 'task complete'
     except SoftTimeLimitExceeded:
         return 'task aborted'
+    except Exception as e:
+        print(e)
 
 @shared_task(bind=True)
 def runLab(self,j_id,uid, serv_id):
@@ -175,6 +187,7 @@ def runLab(self,j_id,uid, serv_id):
         task_Err = Error(owner=user, from_job_id = j_id, errors="")
         error_flag=False
         b=None
+        layer = get_channel_layer()
         try:
             job = Job.objects.get(owner=user, jid=j_id)
             job.status='RUNNING'
@@ -189,6 +202,7 @@ def runLab(self,j_id,uid, serv_id):
             error_flag=True
             raise SoftTimeLimitExceeded()
         progress_recorder = ProgressRecorder(self)
+        msg = {'type': 'task_message', 'status': 'RUNNING', 'action':'Setting Up', 'task_id': self.request.id}
 
         toReturn = ""
         try:
@@ -196,9 +210,10 @@ def runLab(self,j_id,uid, serv_id):
 
             #print path
             config = open(path+"/config.txt","r")
+            AtoS(layer.group_send)(str(job.id), msg)
             progress_recorder.set_progress(1, 100)
-            job.cur_action = "Setting Up"
-            job.save()
+            # job.cur_action = "Setting Up"
+            # job.save()
 
             a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"rm -rf perflab-setup\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -212,9 +227,10 @@ def runLab(self,j_id,uid, serv_id):
             b.wait()
             c = b.stdout.read()
             progress_recorder.set_progress(3, 100)
-
-            job.cur_action = "Scanning FilterMain"
-            job.save()
+            msg['action'] = "Scanning FilterMain"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Scanning FilterMain"
+            # job.save()
 
             f = open(path+"FilterMain.cpp","r")
             for line in f:
@@ -228,9 +244,10 @@ def runLab(self,j_id,uid, serv_id):
                 b.wait()
                 c = b.stdout.read()
             progress_recorder.set_progress(4, 100)
-
-            job.cur_action = "Sending Files"
-            job.save()
+            msg['action'] = "Sending Files"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Sending Files"
+            # job.save()
             """For each file in config, check illegal lib, then copy to server"""
 
             for line in config:
@@ -255,9 +272,10 @@ def runLab(self,j_id,uid, serv_id):
                 task_Err.save()
                 raise SoftTimeLimitExceeded()
             progress_recorder.set_progress(5, 100)
-
-            job.cur_action = "Compiling..."
-            job.save()
+            msg['action'] = "Compiling..."
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Compiling..."
+            # job.save()
 
             a="ssh -i /home/perfserv/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"cd perflab-setup/ ; make filter\""
             b=Popen(a, shell=True, stdout=PIPE, stderr=PIPE)
@@ -278,8 +296,10 @@ def runLab(self,j_id,uid, serv_id):
                     raise SoftTimeLimitExceeded()
             #print c
             progress_recorder.set_progress(10, 100)
-            job.cur_action = "Running Gauss"
-            job.save()
+            msg['action'] = "Running Gauss"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Running Gauss"
+            # job.save()
 
             status = 10.0
             tests = 5
@@ -310,8 +330,10 @@ def runLab(self,j_id,uid, serv_id):
                      task_Err.errors+="Gauss:\n " + str(sys.exc_info()) + " " + serv.hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
                      task_Err.save()
                      raise SoftTimeLimitExceeded()
-            job.cur_action = "Running Avg"
-            job.save()
+            msg['action'] = "Running Avg"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Running Avg"
+            # job.save()
             #AVG
             count = 0
             avg = []
@@ -334,9 +356,10 @@ def runLab(self,j_id,uid, serv_id):
                     task_Err.errors+="Avg:\n " + str(sys.exc_info()) + " " + serv.hostname + " " + str(c) + "\n"+ str(a) + "\n" + str(b.stderr.read()) + "\n"
                     task_Err.save()
                     raise SoftTimeLimitExceeded()
-
-            job.cur_action = "Running HLine"
-            job.save()
+            msg['action'] = "Running HLine"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Running HLine"
+            # job.save()
             #HLINE
             count = 0
             hline = []
@@ -361,8 +384,10 @@ def runLab(self,j_id,uid, serv_id):
                     task_Err.save()
                     error_flag=True
                     raise SoftTimeLimitExceeded()
-            job.cur_action = "Running Emboss"
-            job.save()
+            msg['action'] = "Running Emboss"
+            AtoS(layer.group_send)(str(job.id), msg)
+            # job.cur_action = "Running Emboss"
+            # job.save()
             #EMBOSS
             count = 0
             emboss = []
@@ -392,8 +417,9 @@ def runLab(self,j_id,uid, serv_id):
 
             scores.sort()
             #print scores
-
-
+            msg['status'] = "SCORING"
+            msg['action'] = "Running HLine"
+            AtoS(layer.group_send)(str(job.id), msg)
             job.status="SCORING"
             job.cur_action="Moving numbers around..."
             job.save()
@@ -429,6 +455,11 @@ def runLab(self,j_id,uid, serv_id):
                     score = 110
             score = int(score)
             toReturn+="\nResulting score is " + str(score)
+
+            msg['status'] = "COMPLETE \nScore: " + str(score)
+            msg['action'] = "Score:" + str(score)
+            AtoS(layer.group_send)(str(job.id), msg)
+
             job.status="COMPLETE \nScore: " + str(score)
             job.cur_action = "Score:" + str(score)
             job.save()
@@ -455,6 +486,9 @@ def runLab(self,j_id,uid, serv_id):
             job.cur_action= "ERROR"
             job.status= "ERROR"
             job.save()
+            msg['status'] = "ERROR"
+            msg['action'] = err_block
+            AtoS(layer.group_send)(str(job.id), msg)
         if b!=None:
             b.kill()
         a="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no perfuser@"+server+ " \"killall -u perfuser;\""
