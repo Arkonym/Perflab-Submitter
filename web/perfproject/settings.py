@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'perfapp',
     'django_tables2',
     'celery_progress',
-    #'django_celery_beat',
+    'channels',
 
 ]
 
@@ -80,6 +80,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'perfproject.wsgi.application'
+ASGI_APPLICATION = 'perfproject.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -134,7 +143,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
     'cleanup': {
         'task': 'perfapp.tasks.cleanup',
-        'schedule': crontab(minute='*/3')  # execute every 3 minutes
+        'schedule': crontab(minute='*/3')  # execute every minute
     },
     'jobDeploy':{
         'task': 'perfapp.tasks.jobDeploy',

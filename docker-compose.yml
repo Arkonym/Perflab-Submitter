@@ -24,6 +24,7 @@ services:
     command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv &&celery -A perfproject worker -l info"
     links:
       - redis
+      - web
     volumes:
       - ./web:/home/perfserv/code
       - uploads:/home/perfserv/uploads
