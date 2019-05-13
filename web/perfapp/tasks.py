@@ -49,7 +49,7 @@ def init():
 def cleanup():
     try:
         jobs = Job.objects.filter(deletable=True)
-        print(jobs)
+        #print(jobs)
     except Job.DoesNotExist:
         return "empty jobs"
     for j in jobs:
@@ -59,14 +59,12 @@ def cleanup():
     return "cleanup complete"
 @shared_task
 def jobDeploy():
-    ###REMOVE THIS BIT###
-    #red.set('servers', 0)
     print("Servers avail: " + red.get('servers').decode())
     if int(red.get('servers')) > 0:
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                running = jobs.filter(status='RUNNING')
+                running = jobs.filter(Q(status='RUNNING') | Q(status='SCORING') | Q(status='In Queue'))
                 if running.exists():
                     continue
                 else:
@@ -91,6 +89,8 @@ def jobDeploy():
                             else:
                                 #print("runLab sent")
                                 task = runLab.delay(cur_job.jid, user.id, serv.id)
+                            cur_job.status = "In Queue"
+                            cur_job.cur_action = "Waiting"
                             cur_job.task_id = task.task_id
                             cur_job.save()
                         except Exception as e:
@@ -100,7 +100,7 @@ def jobDeploy():
         for user in User.objects.all():
             jobs = Job.objects.filter(owner=user)
             if jobs.exists():
-                running = jobs.filter(status='RUNNING')
+                running = jobs.filter(Q(status='RUNNING') | Q(status='SCORING') | Q(status='In Queue'))
                 if running.exists():
                     continue
                 else:
@@ -112,15 +112,7 @@ def jobDeploy():
                         print(task.task_id)
                         cur_job.save()
     return "Deploy complete"
-@shared_task(bind=True)
-def placeholder(self):
-    ph_recorder = ProgressRecorder(self)
-    flag=True
-    while(flag!=False):
-        try:
-            pass
-        except SoftTimeLimitExceeded:
-            flag=False
+
 
 @shared_task(bind=True)
 def dummyTask(self,j_id, uid):
