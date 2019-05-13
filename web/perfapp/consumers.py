@@ -40,6 +40,36 @@ class TaskConsumer(AsyncWebsocketConsumer):
             'action': action,
             'task_id': task_id
         }))
+class CommandConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user_id = self.scope['url_route']['kwargs']['user_id']
+        self.user_group_name = 'command_%s' % self.user_id
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.user_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        command = text_data_json['command']
+
+        await self.channel_layer.group_send(self.user_group_name,{
+            'type':'command_message',
+            'command': command
+        })
+    async def task_message(self, event):
+        command = event['command']
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'command': command
+        }))
 
 # class TaskConsumer(WebsocketConsumer):
 #     def connect(self, id = None):

@@ -53,11 +53,14 @@ def init():
 def cleanup():
     try:
         jobs = Job.objects.filter(deletable=True)
-        print(jobs)
+        layer = get_channel_layer()
+        #print(jobs)
     except Job.DoesNotExist:
         return "empty jobs"
     for j in jobs:
-            #print(str(j.owner) + " : " +str(j))
+            uid = j.owner.id
+            group = 'command_'+str(uid)
+            AtoS(layer.group_send)(group, {'type':'command_message', 'command':'refresh'})
             j.delete()
     jobs.delete()
     return "cleanup complete"
@@ -94,11 +97,12 @@ def jobDeploy():
                             else:
                                 #print("runLab sent")
                                 task = runLab.delay(cur_job.jid, user.id, serv.id)
-                            msg = {'type': 'task_message', 'status': 'In Queue', 'action': 'Waiting', 'task_id': task.task_id}
-                            AtoS(layer.group_send)(str(job_id), msg)
                             cur_job.status = "In Queue"
+                            cur_job.cur_action = "Waiting"
                             cur_job.task_id = task.task_id
                             cur_job.save()
+                            msg = {'type': 'task_message', 'status': cur_job.status, 'action': cur_job.cur_action, 'task_id': task.task_id}
+                            AtoS(layer.group_send)(str(job_id), msg)
                         except Exception as e:
                             print(e)
                             continue
