@@ -3,11 +3,6 @@
 {% load tz %}
 {% block head %}
 <title> Profile</title>
-<script>
-  function redirect(){
-    window.location.href = "/profile/";
-  } setTimeout(redirect, 300000);
-</script>
 {% endblock %}
 
 {% block content %}
@@ -230,20 +225,19 @@
 {% block script%}
 <script>
   var Row = {};
-  var job_group = 50;
+  var user_group = {{user.json}};
   var taskSocket = new WebSocket(
     'ws://'+ window.location.host +
-    '/ws/task/' + job_group + '/'
+    '/ws/command/' + user_group + '/'
     );
   console.log(window.location.host)
   taskSocket.onmessage = function(e){
     var data = JSON.parse(e.data);
-    var status = data['status'];
-    var action = data['action'];
-    var task_id = data['task_id'];
-    console.log(status);
-    console.log(action);
-    console.log(task_id);
+    var command = data['command'];
+    console.log(command);
+    if(command == 'refresh'){
+      window.location.href = "/profile/";
+    }
   };
     </script>
 {% endblock %}

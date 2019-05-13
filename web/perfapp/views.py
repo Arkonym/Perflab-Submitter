@@ -102,6 +102,7 @@ def profile(request):
             logged_errors = None
     except:
         logged_errors = None
+    user = {'object': request.user, 'json': mark_safe(json.dumps(request.user.id))}
     context={
         "title": "Profile",
         "user":user,
