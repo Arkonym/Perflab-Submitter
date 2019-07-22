@@ -1,0 +1,76 @@
+{% if job_list %}
+<div class="cell small-12 table-scroll">
+  <table id="stack" class="hover">
+    <thead>
+      <tr>
+        <th>Task #</th>
+        <th>Server</th>
+        <th>Status</th>
+        <th>Time Started</th>
+        <th>Progress</th>
+      </tr>
+      </thead>
+    <tbody>
+      {% for job in job_list %}
+        {% if job.owner == user %}
+        <tr class="user-color">
+          <td style="display:none"><a href="/runlab/{{job.id}}"></a></td>
+          <td><a href="/runlab/{{job.id}}">{{job.id}}</a></td>
+          <td><a href="/runlab/{{job.id}}">{{job.hostname}}</a></td>
+          <td><a href="/runlab/{{job.id}}">{{job.status}}</a></td>
+          <td><a href="/runlab/{{job.id}}">{{job.time_started}}</a></td>
+          <td><a href="/runlab/{{job.id}}">
+            <div class="progress-wrapper">
+              <div id="progress-bar {{job.id}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+            </div>
+            <div id="progress-bar-message {{job.id}}">Waiting...</div>
+            <script>
+              // function customProgress(progressBarElement, progressBarMessageElement, progress) {
+              //   progressBarElement.style.width = progress.percent + "%";
+              //   progressBarMessageElement.innerHTML = (progress.percent + "%");
+              //   }
+              var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
+              document.addEventListener("DOMContentLoaded", function () {
+                CeleryProgressBar.initProgressBar(progressUrl);
+              });
+            </script>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td>{{job.id}}</td>
+          <td>{{job.status}}</td>
+          <td>{{job.time_started}}</td>
+          <td>
+            <div class="progress-wrapper">
+              <div id="progress-bar {{job.id}}" class="progress-bar" style="background-color: #68a9ef; width: 100%;">&nbsp</div>
+            </div>
+            <div id="progress-bar-message{{job.id}}">Waiting...</div>
+            <script>
+              // function customProgress(progressBarElement, progressBarMessageElement, progress) {
+              //   progressBarElement.style.width = progress.percent + "%";
+              //   progressBarMessageElement.innerHTML = (progress.percent + "%");
+              //   }
+              var progressUrl = "{% url 'celery_progress:task_status' job.task_id %}";
+              document.addEventListener("DOMContentLoaded", function () {
+                CeleryProgressBar.initProgressBar(progressUrl);
+              });
+            </script>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</div>
+{% endif %}
+</div>
+{% endif %}
+
+
+// if (Row["last_stat_{{entry.id}}"] != 'RUNNING' && status =='RUNNING'){
+//   $('#_action_button').load("{% url 'perfapp:stop_button' entry.object.id %}");
+// }
+// else if (Row["last_stat_{{entry.id}}"]!='ERROR' && status == 'ERROR'){
+//   $('#_action_button').load("{% url 'perfapp:clear_button' entry.object.id %}");
+// }

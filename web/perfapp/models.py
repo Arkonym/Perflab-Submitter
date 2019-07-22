@@ -104,17 +104,16 @@ class Error(models.Model):
     time_stamp = models.DateTimeField(auto_now_add=True)
     errors = models.TextField(blank=True, null=True, default=None)
 
-    # def get_dir(instance):
-    #     id = instance.owner.id
-    #     if os.getcwd()!="/perfserv/uploads" or os.getcwd()!="/home/perfserv/uploads":
-    #         try:
-    #             os.chdir("/perfserv/uploads")
-    #             if not os.path.isdir("./"+str(id)):
-    #                 os.mkdir("./"+str(id)+"/errors")
-    #             return "perfserv/uploads/"+ str(id) + "/errors"
-    #         except:
-    #             os.chdir("/home/perfserv/uploads")
-    #             if not os.path.isdir("./"+str(id)):
-    #                 os.mkdir("./"+str(id)+"/errors")
-    #             return "/home/perfserv/uploads/"+ str(id) + "/errors"
-    #     else: return "/errors"
+# class Task_Message(models.Model):
+#     from_job = models.ForeignKey(Job, on_delete=models.CASCADE)
+#     status = models.CharField(max_length=10, blank = False, null=False)
+#     action = models.CharField(max_length=400, blank = True ,null = True)
+#     task_id = models.CharField(max_length=50, blank =True, null=True)
+#     time_stamp = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return str(self.from_job.id) + " : " + self.status
+#
+#     def last_5(self, jid):
+#         job = Job.objects.get(id = jid)
+#         return Task_Message.filter(from_job = job).order_by('-timestamp')[:5]

@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  redis:
+    image: "redis:alpine"
+
+  web:
+    build: ./web
+    command: bash -c "python manage.py clean_jobs && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    links:
+      - redis
+    volumes:
+      - ./web:/perfserv/code/
+      - uploads:/perfserv/uploads
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+
+  celery:
+    build:
+      context: ./web
+      dockerfile: CeleryDockerfile
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && celery -A perfproject worker -l info"
+    links:
+      - redis
+      - web
+    volumes:
+      - ./web:/home/perfserv/code
+      - uploads:/home/perfserv/uploads
+    depends_on:
+      - redis
+      - web
+
+  celery-beat:
+    build:
+      context: ./web
+      dockerfile: CeleryDockerfile
+    command: bash -c "chown -R perfserv:perfserv /home/perfserv && su perfserv && celery -A perfproject beat -l info"
+    links:
+      - redis
+    volumes:
+      - ./web:/home/perfserv/code
+      - uploads:/home/perfserv/uploads
+    depends_on:
+      - redis
+      - web
+
+volumes:
+  uploads:

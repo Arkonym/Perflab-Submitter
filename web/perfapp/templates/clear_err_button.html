@@ -1,0 +1,4 @@
+<form action="{% url 'perfapp:Cancel' j_id %}" method="post">
+  {% csrf_token %}
+  <input type="Submit" class="button secondary" value="Clear" />
+</form>
